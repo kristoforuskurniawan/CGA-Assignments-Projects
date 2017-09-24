@@ -64,10 +64,14 @@ namespace Assignment_2_Draw_Line {
 	private: System::Windows::Forms::Button^  circleButton;
 	private: System::Windows::Forms::Label^  circleAlgorithmLabel;
 	private: System::Windows::Forms::ComboBox^  circleAlgorithmChoices;
-
-
-
-
+	private: System::Windows::Forms::Label^  InputDetailLabel_2;
+	private: System::Windows::Forms::Label^  InputDetailLabel_1;
+	private: System::Windows::Forms::Label^  xCenterLabel;
+	private: System::Windows::Forms::Label^  yCenterLabel;
+	private: System::Windows::Forms::TextBox^  xC_textBox;
+	private: System::Windows::Forms::TextBox^  yC_TextBox;
+	private: System::Windows::Forms::Label^  RadiusLabel;
+	private: System::Windows::Forms::TextBox^  Radius_textBox;
 
 	protected:
 		
@@ -104,6 +108,14 @@ namespace Assignment_2_Draw_Line {
 			this->circleButton = (gcnew System::Windows::Forms::Button());
 			this->circleAlgorithmLabel = (gcnew System::Windows::Forms::Label());
 			this->circleAlgorithmChoices = (gcnew System::Windows::Forms::ComboBox());
+			this->InputDetailLabel_2 = (gcnew System::Windows::Forms::Label());
+			this->InputDetailLabel_1 = (gcnew System::Windows::Forms::Label());
+			this->xCenterLabel = (gcnew System::Windows::Forms::Label());
+			this->yCenterLabel = (gcnew System::Windows::Forms::Label());
+			this->xC_textBox = (gcnew System::Windows::Forms::TextBox());
+			this->yC_TextBox = (gcnew System::Windows::Forms::TextBox());
+			this->RadiusLabel = (gcnew System::Windows::Forms::Label());
+			this->Radius_textBox = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->mainCanvas))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -261,28 +273,105 @@ namespace Assignment_2_Draw_Line {
 			// circleAlgorithmLabel
 			// 
 			this->circleAlgorithmLabel->AutoSize = true;
-			this->circleAlgorithmLabel->Location = System::Drawing::Point(384, 223);
+			this->circleAlgorithmLabel->Location = System::Drawing::Point(384, 256);
 			this->circleAlgorithmLabel->Name = L"circleAlgorithmLabel";
-			this->circleAlgorithmLabel->Size = System::Drawing::Size(79, 13);
+			this->circleAlgorithmLabel->Size = System::Drawing::Size(50, 13);
 			this->circleAlgorithmLabel->TabIndex = 17;
-			this->circleAlgorithmLabel->Text = L"Circle Algorithm";
+			this->circleAlgorithmLabel->Text = L"Algorithm";
 			this->circleAlgorithmLabel->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
 			// 
 			// circleAlgorithmChoices
 			// 
 			this->circleAlgorithmChoices->FormattingEnabled = true;
 			this->circleAlgorithmChoices->Items->AddRange(gcnew cli::array< System::Object^  >(3) { L"----", L"Midpoint Circle", L"Second Order" });
-			this->circleAlgorithmChoices->Location = System::Drawing::Point(464, 220);
+			this->circleAlgorithmChoices->Location = System::Drawing::Point(463, 253);
 			this->circleAlgorithmChoices->Name = L"circleAlgorithmChoices";
 			this->circleAlgorithmChoices->Size = System::Drawing::Size(148, 21);
 			this->circleAlgorithmChoices->TabIndex = 18;
 			this->circleAlgorithmChoices->SelectedIndex = 0;
 			// 
+			// InputDetailLabel_2
+			// 
+			this->InputDetailLabel_2->AutoSize = true;
+			this->InputDetailLabel_2->Location = System::Drawing::Point(431, 226);
+			this->InputDetailLabel_2->Name = L"InputDetailLabel_2";
+			this->InputDetailLabel_2->Size = System::Drawing::Size(113, 13);
+			this->InputDetailLabel_2->TabIndex = 19;
+			this->InputDetailLabel_2->Text = L"Special Input for Circle";
+			this->InputDetailLabel_2->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			// 
+			// InputDetailLabel_1
+			// 
+			this->InputDetailLabel_1->AutoSize = true;
+			this->InputDetailLabel_1->Location = System::Drawing::Point(416, 12);
+			this->InputDetailLabel_1->Name = L"InputDetailLabel_1";
+			this->InputDetailLabel_1->Size = System::Drawing::Size(142, 13);
+			this->InputDetailLabel_1->TabIndex = 20;
+			this->InputDetailLabel_1->Text = L"Input for Line and Rectangle";
+			this->InputDetailLabel_1->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			// 
+			// xCenterLabel
+			// 
+			this->xCenterLabel->AutoSize = true;
+			this->xCenterLabel->Location = System::Drawing::Point(384, 289);
+			this->xCenterLabel->Name = L"xCenterLabel";
+			this->xCenterLabel->Size = System::Drawing::Size(48, 13);
+			this->xCenterLabel->TabIndex = 21;
+			this->xCenterLabel->Text = L"X Center";
+			// 
+			// yCenterLabel
+			// 
+			this->yCenterLabel->AutoSize = true;
+			this->yCenterLabel->Location = System::Drawing::Point(384, 320);
+			this->yCenterLabel->Name = L"yCenterLabel";
+			this->yCenterLabel->Size = System::Drawing::Size(48, 13);
+			this->yCenterLabel->TabIndex = 22;
+			this->yCenterLabel->Text = L"Y Center";
+			// 
+			// xC_textBox
+			// 
+			this->xC_textBox->Location = System::Drawing::Point(463, 286);
+			this->xC_textBox->Name = L"xC_textBox";
+			this->xC_textBox->Size = System::Drawing::Size(148, 20);
+			this->xC_textBox->TabIndex = 23;
+			// 
+			// yC_TextBox
+			// 
+			this->yC_TextBox->Location = System::Drawing::Point(463, 317);
+			this->yC_TextBox->Name = L"yC_TextBox";
+			this->yC_TextBox->Size = System::Drawing::Size(148, 20);
+			this->yC_TextBox->TabIndex = 24;
+			// 
+			// RadiusLabel
+			// 
+			this->RadiusLabel->AutoSize = true;
+			this->RadiusLabel->Location = System::Drawing::Point(384, 349);
+			this->RadiusLabel->Name = L"RadiusLabel";
+			this->RadiusLabel->Size = System::Drawing::Size(40, 13);
+			this->RadiusLabel->TabIndex = 25;
+			this->RadiusLabel->Text = L"Radius";
+			this->RadiusLabel->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+			// 
+			// Radius_textBox
+			// 
+			this->Radius_textBox->Location = System::Drawing::Point(462, 346);
+			this->Radius_textBox->Name = L"Radius_textBox";
+			this->Radius_textBox->Size = System::Drawing::Size(149, 20);
+			this->Radius_textBox->TabIndex = 26;
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(624, 410);
+			this->ClientSize = System::Drawing::Size(624, 416);
+			this->Controls->Add(this->Radius_textBox);
+			this->Controls->Add(this->RadiusLabel);
+			this->Controls->Add(this->yC_TextBox);
+			this->Controls->Add(this->xC_textBox);
+			this->Controls->Add(this->yCenterLabel);
+			this->Controls->Add(this->xCenterLabel);
+			this->Controls->Add(this->InputDetailLabel_1);
+			this->Controls->Add(this->InputDetailLabel_2);
 			this->Controls->Add(this->circleAlgorithmChoices);
 			this->Controls->Add(this->circleAlgorithmLabel);
 			this->Controls->Add(this->circleButton);
@@ -312,7 +401,8 @@ namespace Assignment_2_Draw_Line {
 #pragma endregion
 
 private: System::Void DrawLineButton_Click(System::Object^  sender, System::EventArgs^  e) { // What happens when you click DrawLneButton
-	if (this->X1_textBox->Text != "" && this->Y1_textBox->Text != "" && this->X2_textBox->Text != "" && this->Y2_textBox->Text != "") { // No empty input
+	if (this->X1_textBox->Text != "" && this->Y1_textBox->Text != "" && this->X2_textBox->Text != "" && this->Y2_textBox->Text != "")  // No empty input
+	{
 		__int16 x1 = System::Int16::Parse(this->X1_textBox->Text); // Convert the String ^fromTextBox object into a 16 bits int (I use 16 bits due to input size)
 		__int16 y1 = System::Int16::Parse(this->Y1_textBox->Text);
 		__int16 x2 = System::Int16::Parse(this->X2_textBox->Text);
@@ -322,95 +412,205 @@ private: System::Void DrawLineButton_Click(System::Object^  sender, System::Even
 		{
 		case 1:
 			//Line Drawing Algorithm goes here;
-			if (x2 <= 346 && y2 <= 346) {
-				if (x2 >= x1 && y2 >= y1) {
-					float m = (y2 - y1) / (x2 - x1);
-					float C = y1 - m * x1;
-					float y;
-					for (x1; x1 <= x2; x1++) {
+			if (x2 <= 346 && y2 <= 346) 
+			{
+				if (x2 >= x1 && y2 >= y1) // Correct
+				{
+					float m = (y2 - y1) / (x2 - x1), C = y1 - m * x1, y;
+					for (x1; x1 <= x2; x1++) 
+					{
 						y = m * x1 + C;
 						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
 					}
 					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 < x1 && y2 >= y1) {
-					MessageBox::Show("X2 < X1 AND Y2 >= Y1");
+				else if (x2 <= x1 && y2 >= y1) // Correct
+				{
+					float m = (y2 - y1) / (x2 - x1), C = y1 - m * x1, y;
+					for (x1; x1 >= x2; x1--) 
+					{
+						y = m * x1 + C;
+						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
+					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 >= x1 && y2 < y1) {
-					MessageBox::Show("X2 >= X1 AND Y2 < Y1");
+				else if (x2 >= x1 && y2 <= y1) // Correct
+				{
+					float m = (y2 - y1) / (x2 - x1), C = y2 - m * x1, y;
+					for (x1; x1 <= x2; x1++)
+					{
+						y = m * x1 + C;
+						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
+					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 < x1 && y2 < y1) {
-					MessageBox::Show("X2 < X1 AND Y2 < Y1");
+				else if (x2 <= x1 && y2 <= y1) // Correct
+				{
+					float m = (y2 - y1) / (x2 - x1), C = y2 - m * x1, y;
+					for (x1; x1 >= x2; x1--)
+					{
+						y = m * x1 + C;
+						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
+					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else {
+				else 
+				{
 					MessageBox::Show("Please insert the proper value for each coordinate!");
 				}
 			}
-			else {
+			else
+			{
 				MessageBox::Show("The maximum x2 and y2 coordinates point is 346px!");
 			}
 			break;
 		case 2:
-			//DDA goes here; Bug, still searching for reason...
-			if (x2 <= 346 && y2 <= 346) {
-				if (x2 >= x1 && y2 >= y1) {
+			//DDA goes here;
+			if (x2 <= 346 && y2 <= 346) 
+			{
+				if (x2 >= x1 && y2 >= y1) // Correct
+				{
 					float m = (y2 - y1) / (x2 - x1);
-					while(x1 <= x2) {
+					while(x1 <= x2) 
+					{
 						this->bitmapCanvas->SetPixel(x1, Math::Round(y1), System::Drawing::Color::Black);
 						x1++;
 						y1 += m;
 					}
 					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 < x1 && y2 >= y1) {
-					MessageBox::Show("X2 < X1 AND Y2 >= Y1");
+				else if (x2 <= x1 && y2 >= y1) // Correct
+				{
+					float m = (y2 - y1) / (x1 - x2);
+					while (x1 >= x2)
+					{
+						this->bitmapCanvas->SetPixel(x1, Math::Round(y1), System::Drawing::Color::Black);
+						x1--;
+						y1 += m;
+					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 >= x1 && y2 < y1) {
-					MessageBox::Show("X2 >= X1 AND Y2 < Y1");
+				else if (x2 >= x1 && y2 <= y1) // Correct
+				{
+					float m = (y2 - y1) / (x2 - x1);
+					while (x1 <= x2)
+					{
+						this->bitmapCanvas->SetPixel(x1, Math::Round(y1), System::Drawing::Color::Black);
+						x1++;
+						y1 += m;
+					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 < x1 && y2 < y1) {
-					MessageBox::Show("X2 < X1 AND Y2 < Y1");
+				else if (x2 <= x1 && y2 <= y1) // Correct
+				{
+					float m = (y2 - y1) / (x2 - x1);
+					while (x1 >= x2)
+					{
+						this->bitmapCanvas->SetPixel(x1, Math::Round(y1), System::Drawing::Color::Black);
+						x1--;
+						y1 -= m;
+					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else {
+				else 
+				{
 					MessageBox::Show("Line Drawing Algorithm only accepts x2 >= x1 AND y2 >= y1");
 				}
 			}
-			else {
+			else 
+			{
 				MessageBox::Show("The maximum x2 and y2 coordinates point is 346px!");
 			}
 			break;
 		case 3:
 			//Midpoint goes here;
-			if (x2 <= 346 && y2 <= 346) {
-				if (x2 >= x1 && y2 >= y1) {
-					int dx = x2 - x1, dy = y2, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
-					while (x1 < x2) {
+			if (x2 <= 346 && y2 <= 346) 
+			{
+				if (x2 >= x1 && y2 >= y1) // Correct
+				{
+					int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
+					while (x1 < x2)
+					{
 						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
 						x1++;
-						if (d < 0) {
+						if (d < 0) 
+						{
 							d += dR;
 						}
-						else {
+						else 
+						{
 							d += dUR;
 							y1++;
 						}
 					}
 					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 < x1 && y2 >= y1) {
-					MessageBox::Show("X2 < X1 AND Y2 >= Y1");
+				else if (x2 <= x1 && y2 >= y1) // Correct
+				{
+					int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
+					while (x1 >= x2) 
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+						x1--;
+						if (d <= 0)
+						{
+							d += dR;
+						}
+						else
+						{
+							d += dUR;
+							y1++;
+						}
+					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 >= x1 && y2 < y1) {
-					MessageBox::Show("X2 >= X1 AND Y2 < Y1");
+				else if (x2 >= x1 && y2 <= y1) // Check this and other 2 algorithms...
+				{
+					int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
+					while (x1 <= x2) 
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+						x1++;
+						if (d <= 0)
+						{
+							d += dR;
+							y1--;
+						}
+						else
+						{
+							d += dUR;
+							//y1++;
+						}
+					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 < x1 && y2 < y1) {
-					MessageBox::Show("X2 < X1 AND Y2 < Y1");
+				else if (x2 <= x1 && y2 <= y1) // Correct
+				{
+					int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
+					while (x1 >= x2)
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+						x1--;
+						if (d <= 0)
+						{
+							d += dR;
+							y1--;
+						}
+						else
+						{
+							d += dUR;
+							//y1++;
+						}
+					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else {
+				else 
+				{
 					MessageBox::Show("Line Drawing Algorithm only accepts x2 >= x1 AND y2 >= y1");
 				}
 			}
-			else {
+			else 
+			{
 				MessageBox::Show("The maximum x2 and y2 coordinates point is 346px!");
 			}
 			break;
@@ -419,26 +619,129 @@ private: System::Void DrawLineButton_Click(System::Object^  sender, System::Even
 			break;
 		}
 	}
+	else 
+	{
+		MessageBox::Show("Please give a proper value for all input!");
+	}
+}
+private: System::Void circleButton_Click(System::Object^  sender, System::EventArgs^  e)
+{
+	if (this->xC_textBox->Text != "" && this->yC_TextBox->Text != "" && this->circleAlgorithmChoices->SelectedIndex != 0 && this->Radius_textBox->Text != "") {
+		__int16 xC = System::Int16::Parse(this->xC_textBox->Text);
+		__int16 yC = System::Int16::Parse(this->yC_TextBox->Text);
+		__int16 r = System::Int16::Parse(this->Radius_textBox->Text);
+
+		switch (this->circleAlgorithmChoices->SelectedIndex)
+		{
+		case 0:
+			MessageBox::Show("Please select the proper algorithm.");
+		case 1:
+			// Midpoint goes here
+			if ((xC == 0 && yC == 0) || xC == 0 || yC == 0) 
+			{
+				MessageBox::Show("The X Center or Y Center are zero, cannot draw a full circle!");
+			}
+			else 
+			{
+				int d = 1 - r, x = 0, y = r;
+				try {
+					while(x < y)
+					{
+						this->bitmapCanvas->SetPixel(x + xC, y + yC, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(y + yC, x + xC, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(y+yC, xC-x, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(x+xC, yC-y, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(xC-x, yC-y, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(yC-y, xC-x, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(yC-y, x+xC, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(xC-x, y+yC, System::Drawing::Color::Black);
+						if (d < 0) {
+							d = d + 2 * x + 3;
+						}
+						else
+						{
+							d = d + 2 * (x - y) + 5;
+							y--;
+						}
+						x++;
+					}
+					this->mainCanvas->Image = bitmapCanvas;
+				}
+				catch (Exception ^e) // Exception handling, prevents the program from crashing.
+				{
+					MessageBox::Show("Please check the input value not to exeed the resolution of 344x344");
+				}
+			}
+			break;
+		case 2:
+			// CHECK HERE, LAST POSITION IS HERE!
+			if ((xC == 0 && yC == 0) || xC == 0 || yC == 0)
+			{
+				MessageBox::Show("The X Center or Y Center are zero, cannot draw a full circle!");
+			}
+			else
+			{
+				int x = 0, y = r, d = 1 - r, dR = 3, dDR = -2 * r + 5;
+				try {
+					while(x < y)
+					{
+						this->bitmapCanvas->SetPixel(x+xC, y+xC, System::Drawing::Color::Black);
+					}
+				}
+				catch (Exception ^e) 
+				{
+					MessageBox::Show("Please check the input value not to exeed the resolution of 344x344");
+				}
+			}
+			// Second order goes here
+			break;
+		default:
+			break;
+		}
+	}
+	else {
+		MessageBox::Show("Please give the x center, y center, radius and circle algorithm!");
+	}
+}
+
+private: System::Void RectangleButton_Click(System::Object^  sender, System::EventArgs^  e) 
+{
+	// Soon after circle is complete. Will draw full black rectangle since I don't know to draw it line by line :p
+	if (this->X1_textBox->Text != "" && this->Y1_textBox->Text != "" && this->X2_textBox->Text != "" && this->Y2_textBox->Text != "") { // No empty input
+	
+	}
 	else {
 		MessageBox::Show("Please give a proper value for all input!");
 	}
 }
-private: System::Void RectangleButton_Click(System::Object^  sender, System::EventArgs^  e) {
-	// Soon after line is complete.
-}
-private: System::Void ClearButton_Click(System::Object^  sender, System::EventArgs^  e) {
+private: System::Void ClearButton_Click(System::Object^  sender, System::EventArgs^  e) 
+{
 	this->X1_textBox->Text = "";
 	this->Y1_textBox->Text = "";
 	this->X2_textBox->Text = "";
 	this->Y2_textBox->Text = "";
+	this->xC_textBox->Text = "";
+	this->yC_TextBox->Text = "";
+	this->Radius_textBox->Text = "";
 	this->algorithmChoices->SelectedIndex = 0;
+	this->circleAlgorithmChoices->SelectedIndex = 0;
+
+	for (int i = 0; i < this->bitmapCanvas->Width; i++) 
+	{
+		for (int j = 0; j < this->bitmapCanvas->Height; j++) 
+		{
+			if (this->bitmapCanvas->GetPixel(i, j) != System::Drawing::Color::White) {
+				this->bitmapCanvas->SetPixel(i, j, System::Drawing::Color::White);
+			}
+			else continue;
+		}
+	}
+	this->mainCanvas->Image = bitmapCanvas;
 }
-private: System::Void exitButton_Click(System::Object^  sender, System::EventArgs^  e) {
+private: System::Void exitButton_Click(System::Object^  sender, System::EventArgs^  e) 
+{
 	this->~MyForm();
 	this->Close();
-}
-private: System::Void circleButton_Click(System::Object^  sender, System::EventArgs^  e) {
-	// Soon after rectangle
 }
 };
 }

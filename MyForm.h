@@ -72,6 +72,9 @@ namespace Assignment_2_Draw_Line {
 	private: System::Windows::Forms::TextBox^  yC_TextBox;
 	private: System::Windows::Forms::Label^  RadiusLabel;
 	private: System::Windows::Forms::TextBox^  Radius_textBox;
+	private: System::Windows::Forms::Button^  CopyButton;
+	private: System::Windows::Forms::Button^  CutButton;
+	private: System::Windows::Forms::Button^  PasteButton;
 
 	protected:
 		
@@ -100,7 +103,6 @@ namespace Assignment_2_Draw_Line {
 			this->X2_textBox = (gcnew System::Windows::Forms::TextBox());
 			this->Y2_Label = (gcnew System::Windows::Forms::Label());
 			this->Y2_textBox = (gcnew System::Windows::Forms::TextBox());
-			this->bitmapCanvas = (gcnew System::Drawing::Bitmap("E:\\CGA\\Assignments\\Assignment 2 - Drawing Line Algorigthm (C++)\\White_Background.jpg"));
 			this->mainCanvas = (gcnew System::Windows::Forms::PictureBox());
 			this->algorithmLabel = (gcnew System::Windows::Forms::Label());
 			this->algorithmChoices = (gcnew System::Windows::Forms::ComboBox());
@@ -116,6 +118,9 @@ namespace Assignment_2_Draw_Line {
 			this->yC_TextBox = (gcnew System::Windows::Forms::TextBox());
 			this->RadiusLabel = (gcnew System::Windows::Forms::Label());
 			this->Radius_textBox = (gcnew System::Windows::Forms::TextBox());
+			this->CopyButton = (gcnew System::Windows::Forms::Button());
+			this->CutButton = (gcnew System::Windows::Forms::Button());
+			this->PasteButton = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->mainCanvas))->BeginInit();
 			this->SuspendLayout();
 			// 
@@ -143,7 +148,7 @@ namespace Assignment_2_Draw_Line {
 			// 
 			this->ClearButton->Location = System::Drawing::Point(287, 375);
 			this->ClearButton->Name = L"ClearButton";
-			this->ClearButton->Size = System::Drawing::Size(75, 23);
+			this->ClearButton->Size = System::Drawing::Size(75, 53);
 			this->ClearButton->TabIndex = 3;
 			this->ClearButton->Text = L"Clear";
 			this->ClearButton->UseVisualStyleBackColor = true;
@@ -248,13 +253,12 @@ namespace Assignment_2_Draw_Line {
 			this->algorithmChoices->Name = L"algorithmChoices";
 			this->algorithmChoices->Size = System::Drawing::Size(148, 21);
 			this->algorithmChoices->TabIndex = 14;
-			this->algorithmChoices->SelectedIndex = 0;
 			// 
 			// exitButton
 			// 
 			this->exitButton->Location = System::Drawing::Point(536, 375);
 			this->exitButton->Name = L"exitButton";
-			this->exitButton->Size = System::Drawing::Size(75, 23);
+			this->exitButton->Size = System::Drawing::Size(75, 53);
 			this->exitButton->TabIndex = 15;
 			this->exitButton->Text = L"Exit";
 			this->exitButton->UseVisualStyleBackColor = true;
@@ -288,7 +292,6 @@ namespace Assignment_2_Draw_Line {
 			this->circleAlgorithmChoices->Name = L"circleAlgorithmChoices";
 			this->circleAlgorithmChoices->Size = System::Drawing::Size(148, 21);
 			this->circleAlgorithmChoices->TabIndex = 18;
-			this->circleAlgorithmChoices->SelectedIndex = 0;
 			// 
 			// InputDetailLabel_2
 			// 
@@ -359,11 +362,41 @@ namespace Assignment_2_Draw_Line {
 			this->Radius_textBox->Size = System::Drawing::Size(149, 20);
 			this->Radius_textBox->TabIndex = 26;
 			// 
+			// CopyButton
+			// 
+			this->CopyButton->Location = System::Drawing::Point(13, 405);
+			this->CopyButton->Name = L"CopyButton";
+			this->CopyButton->Size = System::Drawing::Size(75, 23);
+			this->CopyButton->TabIndex = 27;
+			this->CopyButton->Text = L"Copy";
+			this->CopyButton->UseVisualStyleBackColor = true;
+			// 
+			// CutButton
+			// 
+			this->CutButton->Location = System::Drawing::Point(102, 405);
+			this->CutButton->Name = L"CutButton";
+			this->CutButton->Size = System::Drawing::Size(75, 23);
+			this->CutButton->TabIndex = 28;
+			this->CutButton->Text = L"Cut";
+			this->CutButton->UseVisualStyleBackColor = true;
+			// 
+			// PasteButton
+			// 
+			this->PasteButton->Location = System::Drawing::Point(194, 405);
+			this->PasteButton->Name = L"PasteButton";
+			this->PasteButton->Size = System::Drawing::Size(75, 23);
+			this->PasteButton->TabIndex = 29;
+			this->PasteButton->Text = L"Paste";
+			this->PasteButton->UseVisualStyleBackColor = true;
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(624, 416);
+			this->ClientSize = System::Drawing::Size(624, 443);
+			this->Controls->Add(this->PasteButton);
+			this->Controls->Add(this->CutButton);
+			this->Controls->Add(this->CopyButton);
 			this->Controls->Add(this->Radius_textBox);
 			this->Controls->Add(this->RadiusLabel);
 			this->Controls->Add(this->yC_TextBox);
@@ -414,50 +447,78 @@ private: System::Void DrawLineButton_Click(System::Object^  sender, System::Even
 			//Line Drawing Algorithm goes here;
 			if (x2 <= 346 && y2 <= 346) 
 			{
-				if (x2 >= x1 && y2 >= y1) // Correct
+				if (x1 == x2 && y1 == y2) // A dot
+				{
+					this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+				}
+				else if (x1 == x2 && y1 < y2) // Vertical line down
+				{
+					for (y1; y1 <= y2; y1++) 
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+					}
+				}
+				else if (x1 == x2 && y1 > y2) // Vertical line up
+				{
+					for (y1; y1 >= y2; y1--)
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+					}
+				}
+				else if (x1 < x2 && y1 == y2) // Horizontal left to right
+				{
+					for (x1; x1 <= x2; x1++)
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+					}
+				}
+				else if (x1 > x2 && y1 == y2) // Horizontal right to left
+				{
+					for (x1; x1 >= x2; x1--)
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+					}
+				}
+				else if (x1 < x2 && y1 < y2) // Diagonal top left to bottom right
 				{
 					float m = (y2 - y1) / (x2 - x1), C = y1 - m * x1, y;
-					for (x1; x1 <= x2; x1++) 
-					{
-						y = m * x1 + C;
-						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
-					}
-					this->mainCanvas->Image = bitmapCanvas;
-				}
-				else if (x2 <= x1 && y2 >= y1) // Correct
-				{
-					float m = (y2 - y1) / (x2 - x1), C = y1 - m * x1, y;
-					for (x1; x1 >= x2; x1--) 
-					{
-						y = m * x1 + C;
-						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
-					}
-					this->mainCanvas->Image = bitmapCanvas;
-				}
-				else if (x2 >= x1 && y2 <= y1) // Correct
-				{
-					float m = (y2 - y1) / (x2 - x1), C = y2 - m * x1, y;
 					for (x1; x1 <= x2; x1++)
 					{
 						y = m * x1 + C;
 						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
 					}
-					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 <= x1 && y2 <= y1) // Correct
+				else if (x1 > x2 && y1 < y2) // Diagonal top right to bottom left
 				{
-					float m = (y2 - y1) / (x2 - x1), C = y2 - m * x1, y;
+					float m = (y2 - y1) / (x2 - x1), C = y1 - m * x1, y;
 					for (x1; x1 >= x2; x1--)
 					{
 						y = m * x1 + C;
 						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
 					}
-					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else 
+				else if (x1 < x2 && y1 > y2) // Diagonal middle lower left area to middle upper right area
 				{
-					MessageBox::Show("Please insert the proper value for each coordinate!");
+					float m = (y2 - y1) / (x2 - x1), C = y1 - m * x1, y;
+					for (x1; x1 <= x2; x1++)
+					{
+						y = m * x1 + C;
+						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
+					}
 				}
+				else if (x1 > x2 && y1 > y2) // Diagonal from bottom right to top left
+				{
+					float m = (y2 - y1) / (x2 - x1), C = y1 - m * x1, y;
+					for (x1; x1 >= x2; x1--)
+					{
+						y = m * x1 + C;
+						this->bitmapCanvas->SetPixel(x1, Math::Round(y), System::Drawing::Color::Black);
+					}
+				}
+				else {
+					MessageBox::Show("Invalid input, please try again!");
+				}
+				this->mainCanvas->Image = bitmapCanvas;
 			}
 			else
 			{
@@ -468,54 +529,74 @@ private: System::Void DrawLineButton_Click(System::Object^  sender, System::Even
 			//DDA goes here;
 			if (x2 <= 346 && y2 <= 346) 
 			{
-				if (x2 >= x1 && y2 >= y1) // Correct
+				if (x1 == x2 && y1 == y2) // A dot
+				{
+					this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+				}
+				else if (x1 == x2 && y1 < y2) // Vertical line down
+				{
+					for (y1; y1 <= y2; y1++)
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+					}
+				}
+				else if (x1 == x2 && y1 > y2) // Vertical line up
+				{
+					for (y1; y1 >= y2; y1--)
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+					}
+				}
+				else if (x1 < x2 && y1 == y2) // Horizontal left to right
+				{
+					for (x1; x1 <= x2; x1++)
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+					}
+				}
+				else if (x1 > x2 && y1 == y2) // Horizontal right to left
+				{
+					for (x1; x1 >= x2; x1--)
+					{
+						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+					}
+				}
+				else if (x1 < x2 && y1 < y2) // Diagonal top left to bottom right
 				{
 					float m = (y2 - y1) / (x2 - x1);
-					while(x1 <= x2) 
+					for (x1; x1 <= x2; x1++, y1+=m)
 					{
 						this->bitmapCanvas->SetPixel(x1, Math::Round(y1), System::Drawing::Color::Black);
-						x1++;
-						y1 += m;
 					}
-					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 <= x1 && y2 >= y1) // Correct
-				{
-					float m = (y2 - y1) / (x1 - x2);
-					while (x1 >= x2)
-					{
-						this->bitmapCanvas->SetPixel(x1, Math::Round(y1), System::Drawing::Color::Black);
-						x1--;
-						y1 += m;
-					}
-					this->mainCanvas->Image = bitmapCanvas;
-				}
-				else if (x2 >= x1 && y2 <= y1) // Correct
+				else if (x1 > x2 && y1 < y2) // Diagonal top right to bottom left
 				{
 					float m = (y2 - y1) / (x2 - x1);
-					while (x1 <= x2)
+					for (x1; x1 >= x2; x1--, y1-=m)
 					{
 						this->bitmapCanvas->SetPixel(x1, Math::Round(y1), System::Drawing::Color::Black);
-						x1++;
-						y1 += m;
 					}
-					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 <= x1 && y2 <= y1) // Correct
+				else if (x1 < x2 && y1 > y2) // Diagonal middle lower left area to middle upper right area
 				{
 					float m = (y2 - y1) / (x2 - x1);
-					while (x1 >= x2)
+					for (x1; x1 <= x2; x1++, y1+=m)
 					{
 						this->bitmapCanvas->SetPixel(x1, Math::Round(y1), System::Drawing::Color::Black);
-						x1--;
-						y1 -= m;
 					}
-					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else 
+				else if (x1 > x2 && y1 > y2) // Diagonal from bottom right to top left
 				{
-					MessageBox::Show("Line Drawing Algorithm only accepts x2 >= x1 AND y2 >= y1");
+					float m = (y2 - y1) / (x2 - x1);
+					for (x1; x1 >= x2; x1--, y1-=m)
+					{
+						this->bitmapCanvas->SetPixel(x1, Math::Round(y1), System::Drawing::Color::Black);
+					}
 				}
+				else {
+					MessageBox::Show("Invalid input, please try again!");
+				}
+				this->mainCanvas->Image = bitmapCanvas;
 			}
 			else 
 			{
@@ -526,88 +607,101 @@ private: System::Void DrawLineButton_Click(System::Object^  sender, System::Even
 			//Midpoint goes here;
 			if (x2 <= 346 && y2 <= 346) 
 			{
-				if (x2 >= x1 && y2 >= y1) // Correct
+				if (x1 == x2 && y1 < y2) // Vertical line down
 				{
-					int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
-					while (x1 < x2)
+					for (y1; y1 <= y2; y1++)
 					{
 						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
-						x1++;
-						if (d < 0) 
-						{
-							d += dR;
-						}
-						else 
-						{
-							d += dUR;
-							y1++;
-						}
 					}
-					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 <= x1 && y2 >= y1) // Correct
+				else if (x1 == x2 && y1 > y2) // Vertical line up
 				{
-					int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
-					while (x1 >= x2) 
+					for (y1; y1 >= y2; y1--)
 					{
 						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
-						x1--;
-						if (d <= 0)
-						{
-							d += dR;
-						}
-						else
-						{
-							d += dUR;
-							y1++;
-						}
 					}
-					this->mainCanvas->Image = bitmapCanvas;
 				}
-				else if (x2 >= x1 && y2 <= y1) // Check this and other 2 algorithms...
-				{
-					int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
-					while (x1 <= x2) 
+				else { // Not vertical line
+					if (x2 >= x1 && y2 >= y1) // Correct
 					{
-						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
-						x1++;
-						if (d <= 0)
+						int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
+						while (x1 < x2)
 						{
-							d += dR;
-							y1--;
-						}
-						else
-						{
-							d += dUR;
-							//y1++;
+							this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+							x1++;
+							if (d < 0)
+							{
+								d += dR;
+							}
+							else
+							{
+								d += dUR;
+								y1++;
+							}
 						}
 					}
-					this->mainCanvas->Image = bitmapCanvas;
-				}
-				else if (x2 <= x1 && y2 <= y1) // Correct
-				{
-					int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
-					while (x1 >= x2)
+					else if (x2 <= x1 && y2 >= y1) // Correct
 					{
-						this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
-						x1--;
-						if (d <= 0)
+						int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
+						while (x1 >= x2)
 						{
-							d += dR;
-							y1--;
-						}
-						else
-						{
-							d += dUR;
-							//y1++;
+							this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+							x1--;
+							if (d <= 0)
+							{
+								d += dR;
+							}
+							else
+							{
+								d += dUR;
+								y1++;
+							}
 						}
 					}
-					this->mainCanvas->Image = bitmapCanvas;
+					else if (x2 >= x1 && y2 <= y1) // Check this and other 2 algorithms...
+					{
+						int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
+						while (x1 <= x2)
+						{
+							this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+							x1++;
+							if (d <= 0)
+							{
+								d += dR;
+								y1--;
+							}
+							else
+							{
+								d += dUR;
+								//y1++;
+							}
+						}
+					}
+					else if (x2 <= x1 && y2 <= y1) // Correct
+					{
+						int dx = x2 - x1, dy = y2 - y1, dR = 2 * dy, dUR = 2 * (dy - dx), d = 2 * dy - dx;
+						while (x1 >= x2)
+						{
+							this->bitmapCanvas->SetPixel(x1, y1, System::Drawing::Color::Black);
+							x1--;
+							if (d <= 0)
+							{
+								d += dR;
+								y1--;
+							}
+							else
+							{
+								d += dUR;
+								//y1++;
+							}
+						}
+					}
+					else
+					{
+						MessageBox::Show("Line Drawing Algorithm only accepts x2 >= x1 AND y2 >= y1");
+					}
 				}
-				else 
-				{
-					MessageBox::Show("Line Drawing Algorithm only accepts x2 >= x1 AND y2 >= y1");
-				}
+				this->mainCanvas->Image = bitmapCanvas;
 			}
 			else 
 			{
@@ -644,17 +738,18 @@ private: System::Void circleButton_Click(System::Object^  sender, System::EventA
 			else 
 			{
 				int d = 1 - r, x = 0, y = r;
-				try {
+				try 
+				{
 					while(x < y)
 					{
 						this->bitmapCanvas->SetPixel(x + xC, y + yC, System::Drawing::Color::Black);
 						this->bitmapCanvas->SetPixel(y + yC, x + xC, System::Drawing::Color::Black);
-						this->bitmapCanvas->SetPixel(y+yC, xC-x, System::Drawing::Color::Black);
-						this->bitmapCanvas->SetPixel(x+xC, yC-y, System::Drawing::Color::Black);
-						this->bitmapCanvas->SetPixel(xC-x, yC-y, System::Drawing::Color::Black);
-						this->bitmapCanvas->SetPixel(yC-y, xC-x, System::Drawing::Color::Black);
-						this->bitmapCanvas->SetPixel(yC-y, x+xC, System::Drawing::Color::Black);
-						this->bitmapCanvas->SetPixel(xC-x, y+yC, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(y + yC, xC - x, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(x + xC, yC - y, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(xC - x, yC - y, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(yC - y, xC - x, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(yC - y, x + xC, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(xC - x, y + yC, System::Drawing::Color::Black);
 						if (d < 0) {
 							d = d + 2 * x + 3;
 						}
@@ -674,7 +769,7 @@ private: System::Void circleButton_Click(System::Object^  sender, System::EventA
 			}
 			break;
 		case 2:
-			// CHECK HERE, LAST POSITION IS HERE!
+			// Second order goes here
 			if ((xC == 0 && yC == 0) || xC == 0 || yC == 0)
 			{
 				MessageBox::Show("The X Center or Y Center are zero, cannot draw a full circle!");
@@ -682,18 +777,40 @@ private: System::Void circleButton_Click(System::Object^  sender, System::EventA
 			else
 			{
 				int x = 0, y = r, d = 1 - r, dR = 3, dDR = -2 * r + 5;
-				try {
+				try 
+				{
 					while(x < y)
 					{
-						this->bitmapCanvas->SetPixel(x+xC, y+xC, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(x + xC, y + yC, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(y + yC, x + xC, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(y + yC, xC - x, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(x + xC, yC - y, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(xC - x, yC - y, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(yC - y, xC - x, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(yC - y, x + xC, System::Drawing::Color::Black);
+						this->bitmapCanvas->SetPixel(xC - x, y + yC, System::Drawing::Color::Black);
+						if (d < 0)
+						{
+							d += dR;
+							dR += 2;
+							dDR += 3;
+						}
+						else
+						{
+							d += dDR;
+							dR += 2;
+							dDR += 5;
+							y--;
+						}
+						x++;
 					}
+					this->mainCanvas->Image = bitmapCanvas;
 				}
 				catch (Exception ^e) 
 				{
 					MessageBox::Show("Please check the input value not to exeed the resolution of 344x344");
 				}
 			}
-			// Second order goes here
 			break;
 		default:
 			break;
@@ -707,7 +824,8 @@ private: System::Void circleButton_Click(System::Object^  sender, System::EventA
 private: System::Void RectangleButton_Click(System::Object^  sender, System::EventArgs^  e) 
 {
 	// Soon after circle is complete. Will draw full black rectangle since I don't know to draw it line by line :p
-	if (this->X1_textBox->Text != "" && this->Y1_textBox->Text != "" && this->X2_textBox->Text != "" && this->Y2_textBox->Text != "") { // No empty input
+	if (this->X1_textBox->Text != "" && this->Y1_textBox->Text != "" && this->X2_textBox->Text != "" && this->Y2_textBox->Text != "")  // No empty input
+	{
 	
 	}
 	else {

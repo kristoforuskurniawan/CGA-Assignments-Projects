@@ -1,6 +1,6 @@
 ﻿Public Class TPolygon
-    Public PolyIndex As Integer = 0
-    Public PolyLine As TElementPolygon 'List of Points
-    Public PolyHead, PolyTail As TElementPolygon 'Head and tail of Linked List
-    Public nextPolygon As TPolygon 'Store multiple polygons
+    'Public PolyIndex As Integer 'Tell the number of polygon that have been created
+    'Public PolyLine As TElementPolygon 'List of Points, this represents the head
+    'Public nextPolygon As TPolygon 'Store multiple polygons
+    Public First As TElementPolygon
 End Class

@@ -28,7 +28,6 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
         Me.ButtonPaste = New System.Windows.Forms.Button()
         Me.CoordinateLabel = New System.Windows.Forms.Label()
         Me.ButtonClear = New System.Windows.Forms.Button()
-        Me.CoordinateLabel2 = New System.Windows.Forms.Label()
         CType(Me.MainCanvas, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -73,9 +72,9 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
         Me.CoordinateLabel.AutoSize = True
         Me.CoordinateLabel.Location = New System.Drawing.Point(518, 24)
         Me.CoordinateLabel.Name = "CoordinateLabel"
-        Me.CoordinateLabel.Size = New System.Drawing.Size(75, 13)
+        Me.CoordinateLabel.Size = New System.Drawing.Size(63, 13)
         Me.CoordinateLabel.TabIndex = 4
-        Me.CoordinateLabel.Text = "X1 = 0, Y1 = 0"
+        Me.CoordinateLabel.Text = "X = 0, Y = 0"
         Me.CoordinateLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'ButtonClear
@@ -87,21 +86,11 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
         Me.ButtonClear.Text = "Clear"
         Me.ButtonClear.UseVisualStyleBackColor = True
         '
-        'CoordinateLabel2
-        '
-        Me.CoordinateLabel2.AutoSize = True
-        Me.CoordinateLabel2.Location = New System.Drawing.Point(518, 37)
-        Me.CoordinateLabel2.Name = "CoordinateLabel2"
-        Me.CoordinateLabel2.Size = New System.Drawing.Size(75, 13)
-        Me.CoordinateLabel2.TabIndex = 6
-        Me.CoordinateLabel2.Text = "X2 = 0, Y2 = 0"
-        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(623, 506)
-        Me.Controls.Add(Me.CoordinateLabel2)
         Me.Controls.Add(Me.ButtonClear)
         Me.Controls.Add(Me.CoordinateLabel)
         Me.Controls.Add(Me.ButtonPaste)
@@ -121,7 +110,7 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
     Friend WithEvents ButtonCut As Button
     Friend WithEvents ButtonPaste As Button
     Friend WithEvents bitmapCanvas As Bitmap = Bitmap.FromFile("C:\\Users\\Kristoforus\\Documents\\CGA-Assignments-Projects\\PA_10\\Polygon_Clipping_PA_10\\White_Background_2.jpg")
+    'Friend WithEvents bitmapCanvas As Bitmap = Bitmap.FromResource(hinstance, _"White_Background_2")
     Friend WithEvents CoordinateLabel As Label
     Friend WithEvents ButtonClear As Button
-    Friend WithEvents CoordinateLabel2 As Label
 End Class

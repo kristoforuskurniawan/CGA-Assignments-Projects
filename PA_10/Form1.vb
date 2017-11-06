@@ -309,59 +309,78 @@
     'Sutherland-Hodgman algorithm method, we will be using NLeft since the DrawClipWindow method uses an anti-clockwise direction
     'Kinda stuck here on the calculation part
     Private Sub SutherlandHodgman(ByRef Polygon As List(Of List(Of Point)), ByRef ClippingWindowPointList As List(Of Point), ByRef ClippedPolygon As List(Of Point), ByVal SelectedPolyIndex As Integer)
-        If (SelectedPolyIndex >= 0) Then 'Polygon has been selected from the poly listbox
-            Dim NormalRight As New List(Of System.Windows.Vector)
-            Dim NormalLeft As New List(Of System.Windows.Vector)
-            Dim ClipWinEdge As New List(Of System.Windows.Vector) 'LAST EDITED HERE On 3 November 2017 at 8:05 PM
-            Dim i As Integer = 1
-            Dim j As Integer = 0
+        Dim NormalRight As New List(Of System.Windows.Vector) 'Store the normal right of clipping window edge
+        Dim NormalLeft As New List(Of System.Windows.Vector) 'Store the normal left of clipping window edge
+        Dim In_Or_Out As New List(Of Integer) 'Stores the result of calculation to determine whether inside or outside
+        Dim ClipWinEdge As New List(Of System.Windows.Vector) 'LAST EDITED HERE On 3 November 2017 at 8:05 PM
 
-            While (i <= ClippingWindowList.Count And j < ClippingWindowList.Count) 'Insert clipping window edge into a list of vector
-                If i = ClippingWindowList.Count Then
-                    i = 0
-                End If
-                ClipWinEdge.Add(New System.Windows.Vector(ClippingWindowList(i).X - ClippingWindowList(j).X, ClippingWindowList(i).Y - ClippingWindowList(j).Y))
-                i = i + 1
-                j = j + 1
-            End While
+        Dim i As Integer = 1
+        Dim j As Integer = 0
 
-            'For abc As Integer = 0 To Polygon(SelectedPolyIndex).Count - 1
-            '    MessageBox.Show("Polygon with index " & SelectedPolyIndex.ToString() & " X = " & Polygon(SelectedPolyIndex)(abc).X.ToString() & ", Y = " & Polygon(SelectedPolyIndex)(abc).Y.ToString())
-            'Next
-
-            'For a As Integer = 0 To ClipWinEdge.Count - 1
-            '    MessageBox.Show("Edge " & a + 1.ToString() & "X = " & ClipWinEdge(a).X.ToString() & ", Y = " & ClipWinEdge(a).Y.ToString())
-            'Next
-
-            If ((ClippingWindowList(0).X < ClippingWindowList(2).X And ClippingWindowList(0).Y < ClippingWindowList(2).Y) Or (ClippingWindowList(0).X > ClippingWindowList(2).X And ClippingWindowList(0).Y > ClippingWindowList(2).Y)) Then 'NRight
-                For edgeIndex As Integer = 0 To ClipWinEdge.Count - 1 'Insert the normal vector into a list
-                    NormalRight.Add(New System.Windows.Vector(ClipWinEdge(edgeIndex).Y, -ClipWinEdge(edgeIndex).X))  'NormalRight is y, -x of edge vector
-                    j = j + 1
-                Next
-
-                For a As Integer = 0 To ClipWinEdge.Count - 1
-                    MessageBox.Show("X = " & NormalRight(a).X.ToString() & ", Y = " & NormalRight(a).Y.ToString())
-                Next
-
-            ElseIf ((ClippingWindowList(0).X < ClippingWindowList(2).X And ClippingWindowList(0).Y > ClippingWindowList(2).Y) Or (ClippingWindowList(0).X > ClippingWindowList(2).X And ClippingWindowList(0).Y < ClippingWindowList(2).Y)) Then 'NLeft
-                For edgeIndex As Integer = 0 To ClipWinEdge.Count - 1 'Insert the normal vector into a list
-                    NormalLeft.Add(New System.Windows.Vector(-ClipWinEdge(edgeIndex).Y, ClipWinEdge(edgeIndex).X))  'NormalRight is y, -x of edge vector
-                    j = j + 1
-                Next
-
-                For a As Integer = 0 To ClipWinEdge.Count - 1
-                    MessageBox.Show("X = " & NormalLeft(a).X.ToString() & ", Y = " & NormalLeft(a).Y.ToString())
-                Next
-
-            Else
-                MessageBox.Show("Please draw a proper clipping window")
+        While (i <= ClippingWindowPointList.Count And j < ClippingWindowPointList.Count) 'Insert clipping window edge into a list of vector -> vector of clipping window vector
+            If i = ClippingWindowPointList.Count Then
+                i = 0
             End If
+            ClipWinEdge.Add(New System.Windows.Vector(ClippingWindowPointList(i).X - ClippingWindowPointList(j).X, ClippingWindowPointList(i).Y - ClippingWindowPointList(j).Y))
+            i = i + 1
+            j = j + 1
+        End While
 
-            CutMode = False
-            DrawMode = True
-            PointList.Clear() 'LAST EDITED HERE On 4 November 2017 at 12:51 AM
+        If ((ClippingWindowPointList(0).X < ClippingWindowPointList(2).X And ClippingWindowPointList(0).Y < ClippingWindowPointList(2).Y) Or (ClippingWindowPointList(0).X > ClippingWindowPointList(2).X And ClippingWindowPointList(0).Y > ClippingWindowPointList(2).Y)) Then 'NRight
+            For edgeIndex As Integer = 0 To ClipWinEdge.Count - 1 'Insert the normal vector into a list
+                NormalRight.Add(New System.Windows.Vector(ClipWinEdge(edgeIndex).Y, -ClipWinEdge(edgeIndex).X))  'NormalRight is y, -x of edge vector
+                j = j + 1
+            Next
+
+            For a As Integer = 0 To ClipWinEdge.Count - 1
+                MessageBox.Show("Normal Right -> X = " & NormalRight(a).X.ToString() & ", Y = " & NormalRight(a).Y.ToString())
+            Next
+
+            For forClip As Integer = 0 To ClippingWindowPointList.Count - 1 'Trying to calculate the dot product
+                For forPoly As Integer = 0 To Polygon(SelectedPolyIndex).Count - 1
+                    MessageBox.Show("Clip Window Point " & forClip + 1.ToString() &
+                                    " X = " & ClippingWindowPointList(forClip).X.ToString() &
+                                    ", Y = " & ClippingWindowPointList(forClip).Y.ToString() &
+                                    " Compared with polygon point " & forPoly + 1.ToString() &
+                                    " X = " & Polygon(SelectedPolyIndex)(forPoly).X.ToString() &
+                                    ", Y = " & Polygon(SelectedPolyIndex)(forPoly).Y.ToString() &
+                                    " dot product with X = " & NormalRight(forClip).X.ToString() &
+                                    ", Y = " & NormalRight(forClip).Y.ToString() & vbNewLine & vbNewLine &
+                                    "The result will be X = " &
+                                    ((Polygon(SelectedPolyIndex)(forPoly).X - ClippingWindowPointList(forClip).X) * NormalRight(forClip).X) + ((Polygon(SelectedPolyIndex)(forPoly).Y - ClippingWindowPointList(forClip).Y) * NormalRight(forClip).Y).ToString())
+                Next
+            Next
+
+        ElseIf ((ClippingWindowPointList(0).X < ClippingWindowPointList(2).X And ClippingWindowPointList(0).Y > ClippingWindowPointList(2).Y) Or (ClippingWindowPointList(0).X > ClippingWindowPointList(2).X And ClippingWindowPointList(0).Y < ClippingWindowPointList(2).Y)) Then 'NLeft
+            For edgeIndex As Integer = 0 To ClipWinEdge.Count - 1 'Insert the normal vector into a list
+                NormalLeft.Add(New System.Windows.Vector(-ClipWinEdge(edgeIndex).Y, ClipWinEdge(edgeIndex).X))  'NormalRight is y, -x of edge vector
+                j = j + 1
+            Next
+
+            For a As Integer = 0 To ClipWinEdge.Count - 1
+                MessageBox.Show("Normal Left -> X = " & NormalLeft(a).X.ToString() & ", Y = " & NormalLeft(a).Y.ToString())
+            Next
+
+            For forClip As Integer = 0 To ClippingWindowPointList.Count - 1 'Trying to calculate the dot product after this store it into a list
+                For forPoly As Integer = 0 To Polygon(SelectedPolyIndex).Count - 1
+                    MessageBox.Show("Clip Window Point " & forClip + 1.ToString() &
+                                    " X = " & ClippingWindowPointList(forClip).X.ToString() &
+                                    ", Y = " & ClippingWindowPointList(forClip).Y.ToString() &
+                                    " Compared with polygon point " & forPoly + 1.ToString() &
+                                    " X = " & Polygon(SelectedPolyIndex)(forPoly).X.ToString() &
+                                    ", Y = " & Polygon(SelectedPolyIndex)(forPoly).Y.ToString() &
+                                    " dot product with X = " & NormalLeft(forClip).X.ToString() &
+                                    ", Y = " & NormalLeft(forClip).Y.ToString() & vbNewLine & vbNewLine &
+                                    "The result will be X = " &
+                                    ((Polygon(SelectedPolyIndex)(forPoly).X - ClippingWindowPointList(forClip).X) * NormalLeft(forClip).X) + ((Polygon(SelectedPolyIndex)(forPoly).Y - ClippingWindowPointList(forClip).Y) * NormalLeft(forClip).Y).ToString())
+                Next
+            Next
         Else
-            MessageBox.Show("Please select which polygon to be clipped.")
+            MessageBox.Show("Please draw a proper clipping window")
         End If
+
+        CutMode = False
+        DrawMode = True
+        PointList.Clear() 'LAST EDITED HERE On 4 November 2017 at 12:51 AM
     End Sub
 End Class

@@ -1,7 +1,6 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
+Partial Class MainForm
     Inherits System.Windows.Forms.Form
-
     'Form overrides dispose to clean up the component list.
     <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
@@ -33,8 +32,18 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SaveCtrlSToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.OpenCtrlOToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.EditToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.CopyCtrCToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.CutCtrlXToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.PasteCtrlVToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.AboutMeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.PolygonList_Label = New System.Windows.Forms.Label()
+        Me.CoordinateList_Label = New System.Windows.Forms.Label()
+        Me.PolygonList_ListBox = New System.Windows.Forms.ListBox()
+        Me.PolyCoord_ListBox = New System.Windows.Forms.ListBox()
         CType(Me.MainCanvas, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
@@ -50,27 +59,27 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
         '
         'ButtonCopy
         '
-        Me.ButtonCopy.Location = New System.Drawing.Point(506, 78)
+        Me.ButtonCopy.Location = New System.Drawing.Point(103, 510)
         Me.ButtonCopy.Name = "ButtonCopy"
-        Me.ButtonCopy.Size = New System.Drawing.Size(106, 23)
+        Me.ButtonCopy.Size = New System.Drawing.Size(85, 40)
         Me.ButtonCopy.TabIndex = 1
         Me.ButtonCopy.Text = "Copy"
         Me.ButtonCopy.UseVisualStyleBackColor = True
         '
         'ButtonCut
         '
-        Me.ButtonCut.Location = New System.Drawing.Point(506, 107)
+        Me.ButtonCut.Location = New System.Drawing.Point(203, 510)
         Me.ButtonCut.Name = "ButtonCut"
-        Me.ButtonCut.Size = New System.Drawing.Size(106, 23)
+        Me.ButtonCut.Size = New System.Drawing.Size(85, 40)
         Me.ButtonCut.TabIndex = 2
         Me.ButtonCut.Text = "Cut"
         Me.ButtonCut.UseVisualStyleBackColor = True
         '
         'ButtonPaste
         '
-        Me.ButtonPaste.Location = New System.Drawing.Point(506, 136)
+        Me.ButtonPaste.Location = New System.Drawing.Point(306, 510)
         Me.ButtonPaste.Name = "ButtonPaste"
-        Me.ButtonPaste.Size = New System.Drawing.Size(106, 23)
+        Me.ButtonPaste.Size = New System.Drawing.Size(85, 40)
         Me.ButtonPaste.TabIndex = 3
         Me.ButtonPaste.Text = "Paste"
         Me.ButtonPaste.UseVisualStyleBackColor = True
@@ -78,7 +87,7 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
         'CoordinateLabel
         '
         Me.CoordinateLabel.AutoSize = True
-        Me.CoordinateLabel.Location = New System.Drawing.Point(518, 24)
+        Me.CoordinateLabel.Location = New System.Drawing.Point(387, 8)
         Me.CoordinateLabel.Name = "CoordinateLabel"
         Me.CoordinateLabel.Size = New System.Drawing.Size(63, 13)
         Me.CoordinateLabel.TabIndex = 4
@@ -87,34 +96,34 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
         '
         'ButtonClear
         '
-        Me.ButtonClear.Location = New System.Drawing.Point(506, 166)
+        Me.ButtonClear.Location = New System.Drawing.Point(407, 510)
         Me.ButtonClear.Name = "ButtonClear"
-        Me.ButtonClear.Size = New System.Drawing.Size(106, 23)
+        Me.ButtonClear.Size = New System.Drawing.Size(85, 40)
         Me.ButtonClear.TabIndex = 5
         Me.ButtonClear.Text = "Clear"
         Me.ButtonClear.UseVisualStyleBackColor = True
         '
         'ButtonFinishPolygon
         '
-        Me.ButtonFinishPolygon.Location = New System.Drawing.Point(506, 49)
+        Me.ButtonFinishPolygon.Location = New System.Drawing.Point(12, 510)
         Me.ButtonFinishPolygon.Name = "ButtonFinishPolygon"
-        Me.ButtonFinishPolygon.Size = New System.Drawing.Size(106, 23)
+        Me.ButtonFinishPolygon.Size = New System.Drawing.Size(85, 40)
         Me.ButtonFinishPolygon.TabIndex = 6
         Me.ButtonFinishPolygon.Text = "Finish Polygon"
         Me.ButtonFinishPolygon.UseVisualStyleBackColor = True
         '
         'MenuStrip1
         '
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.HelpToolStripMenuItem})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.EditToolStripMenuItem, Me.HelpToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
-        Me.MenuStrip1.Size = New System.Drawing.Size(624, 24)
+        Me.MenuStrip1.Size = New System.Drawing.Size(663, 24)
         Me.MenuStrip1.TabIndex = 7
         Me.MenuStrip1.Text = "MenuStrip1"
         '
         'FileToolStripMenuItem
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SaveCtrlSToolStripMenuItem, Me.OpenCtrlOToolStripMenuItem})
+        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SaveCtrlSToolStripMenuItem, Me.OpenCtrlOToolStripMenuItem, Me.ToolStripSeparator1, Me.ExitToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
         Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
         Me.FileToolStripMenuItem.Text = "File"
@@ -122,14 +131,50 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
         'SaveCtrlSToolStripMenuItem
         '
         Me.SaveCtrlSToolStripMenuItem.Name = "SaveCtrlSToolStripMenuItem"
-        Me.SaveCtrlSToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
-        Me.SaveCtrlSToolStripMenuItem.Text = "Save (Ctrl+S)"
+        Me.SaveCtrlSToolStripMenuItem.Size = New System.Drawing.Size(103, 22)
+        Me.SaveCtrlSToolStripMenuItem.Text = "Save"
         '
         'OpenCtrlOToolStripMenuItem
         '
         Me.OpenCtrlOToolStripMenuItem.Name = "OpenCtrlOToolStripMenuItem"
-        Me.OpenCtrlOToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
-        Me.OpenCtrlOToolStripMenuItem.Text = "Open (Ctrl+O)"
+        Me.OpenCtrlOToolStripMenuItem.Size = New System.Drawing.Size(103, 22)
+        Me.OpenCtrlOToolStripMenuItem.Text = "Open"
+        '
+        'ToolStripSeparator1
+        '
+        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(100, 6)
+        '
+        'ExitToolStripMenuItem
+        '
+        Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
+        Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(103, 22)
+        Me.ExitToolStripMenuItem.Text = "Exit"
+        '
+        'EditToolStripMenuItem
+        '
+        Me.EditToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.CopyCtrCToolStripMenuItem, Me.CutCtrlXToolStripMenuItem, Me.PasteCtrlVToolStripMenuItem})
+        Me.EditToolStripMenuItem.Name = "EditToolStripMenuItem"
+        Me.EditToolStripMenuItem.Size = New System.Drawing.Size(39, 20)
+        Me.EditToolStripMenuItem.Text = "Edit"
+        '
+        'CopyCtrCToolStripMenuItem
+        '
+        Me.CopyCtrCToolStripMenuItem.Name = "CopyCtrCToolStripMenuItem"
+        Me.CopyCtrCToolStripMenuItem.Size = New System.Drawing.Size(148, 22)
+        Me.CopyCtrCToolStripMenuItem.Text = "Copy (Ctr;+C)"
+        '
+        'CutCtrlXToolStripMenuItem
+        '
+        Me.CutCtrlXToolStripMenuItem.Name = "CutCtrlXToolStripMenuItem"
+        Me.CutCtrlXToolStripMenuItem.Size = New System.Drawing.Size(148, 22)
+        Me.CutCtrlXToolStripMenuItem.Text = "Cut (Ctrl+X)"
+        '
+        'PasteCtrlVToolStripMenuItem
+        '
+        Me.PasteCtrlVToolStripMenuItem.Name = "PasteCtrlVToolStripMenuItem"
+        Me.PasteCtrlVToolStripMenuItem.Size = New System.Drawing.Size(148, 22)
+        Me.PasteCtrlVToolStripMenuItem.Text = "Paste (Ctrl+V)"
         '
         'HelpToolStripMenuItem
         '
@@ -141,14 +186,53 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
         'AboutMeToolStripMenuItem
         '
         Me.AboutMeToolStripMenuItem.Name = "AboutMeToolStripMenuItem"
-        Me.AboutMeToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.AboutMeToolStripMenuItem.Size = New System.Drawing.Size(127, 22)
         Me.AboutMeToolStripMenuItem.Text = "About Me"
+        '
+        'PolygonList_Label
+        '
+        Me.PolygonList_Label.AutoSize = True
+        Me.PolygonList_Label.Location = New System.Drawing.Point(531, 24)
+        Me.PolygonList_Label.Name = "PolygonList_Label"
+        Me.PolygonList_Label.Size = New System.Drawing.Size(64, 13)
+        Me.PolygonList_Label.TabIndex = 9
+        Me.PolygonList_Label.Text = "Polygon List"
+        '
+        'CoordinateList_Label
+        '
+        Me.CoordinateList_Label.AutoSize = True
+        Me.CoordinateList_Label.Location = New System.Drawing.Point(531, 238)
+        Me.CoordinateList_Label.Name = "CoordinateList_Label"
+        Me.CoordinateList_Label.Size = New System.Drawing.Size(77, 13)
+        Me.CoordinateList_Label.TabIndex = 12
+        Me.CoordinateList_Label.Text = "Coordinate List"
+        '
+        'PolygonList_ListBox
+        '
+        Me.PolygonList_ListBox.BorderStyle = System.Windows.Forms.BorderStyle.None
+        Me.PolygonList_ListBox.FormattingEnabled = True
+        Me.PolygonList_ListBox.Location = New System.Drawing.Point(507, 40)
+        Me.PolygonList_ListBox.Name = "PolygonList_ListBox"
+        Me.PolygonList_ListBox.Size = New System.Drawing.Size(133, 182)
+        Me.PolygonList_ListBox.TabIndex = 13
+        '
+        'PolyCoord_ListBox
+        '
+        Me.PolyCoord_ListBox.FormattingEnabled = True
+        Me.PolyCoord_ListBox.Location = New System.Drawing.Point(507, 254)
+        Me.PolyCoord_ListBox.Name = "PolyCoord_ListBox"
+        Me.PolyCoord_ListBox.Size = New System.Drawing.Size(133, 238)
+        Me.PolyCoord_ListBox.TabIndex = 14
         '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(624, 522)
+        Me.ClientSize = New System.Drawing.Size(663, 563)
+        Me.Controls.Add(Me.PolyCoord_ListBox)
+        Me.Controls.Add(Me.PolygonList_ListBox)
+        Me.Controls.Add(Me.CoordinateList_Label)
+        Me.Controls.Add(Me.PolygonList_Label)
         Me.Controls.Add(Me.ButtonFinishPolygon)
         Me.Controls.Add(Me.ButtonClear)
         Me.Controls.Add(Me.CoordinateLabel)
@@ -184,4 +268,14 @@ Partial Class MainForm 'FUck it let's just mix the clas HUAHAHAHA
     Friend WithEvents OpenCtrlOToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents HelpToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents AboutMeToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents PolygonList_Label As Label
+    Friend WithEvents EditToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents CopyCtrCToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents CutCtrlXToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents PasteCtrlVToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStripSeparator1 As ToolStripSeparator
+    Friend WithEvents ExitToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents CoordinateList_Label As Label
+    Friend WithEvents PolygonList_ListBox As ListBox
+    Friend WithEvents PolyCoord_ListBox As ListBox
 End Class

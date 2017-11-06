@@ -1,175 +1,99 @@
 ﻿Public Class MainForm
-
-    'Private points As TPoint
-    'Private headPolygon, tailPolygon As TPolygon 'For the head and tail of Polygon list
-    'Private headPolyElement, tailPolyElement As TElementPolygon 'For the head and tail of Element of Polygon List
-    'Private polygonIndexNum As Integer
-    'Private polyElementIndexNum As Integer
-    Dim pressedButton As Boolean 'Last Edited here On 27 October 2017 at 2:49 PM
-
     'First initialize all components
-    Private ListOfPoints As TPoint 'Represents the Linked List of points
-    Private ListOfPolyElements As TElementPolygon 'Represents the Linked List of polygon's element
-    Private HeadPolygon As TPolygon
-    Dim PointNum As Integer = 1 'Number of points that have been inserted into the list
-    Dim PolyElmtNum As Integer = 1
-    Dim X1, Y1, X2, Y2 As Integer 'To store captured coordinates and leaving coordinates
+
+    Private Point, Point1_Clip, Point2_Clip, Point3_Clip, Point4_Clip As Point
+    Private PointList, ClippingWindowList, ClippedPolygon As List(Of Point)
+    Private Polygon As List(Of List(Of Point)) 'List of polygon as a List Of List Of Points
+    Private newBitmap As Bitmap
+    Private mRect As Rectangle
+    Private x, y, Clip_X1, Clip_X2, Clip_Y1, Clip_Y2, rectWidth, rectHeight, PointNum, PolyENum, SelectedPolyIndex As Integer
+    Private PositionPointArr As Integer = 0
+    Private pressedButton, afterClip, CopyMode, DrawMode, CutMode, PasteMode As Boolean 'Last Edited here On 27 October 2017 at 2:49 PM
+
     'mainCanvas resolution is 480x480
 
-    Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load 'Executed as soon as the form is loaded
-        ' Set all local variables's default value
-        ListOfPoints = Nothing
-        ListOfPolyElements = Nothing
-        HeadPolygon = Nothing
+    Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load 'Executed as soon as the form is loaded, Set all local variables's default value
+
+        FormBorderStyle = FormBorderStyle.FixedDialog
+        MaximizeBox = False
+        MinimizeBox = True
+
+        StartPosition = FormStartPosition.CenterScreen
+        ' Remove the control box so the form will only display client area.
+        ControlBox = True
+
+        afterClip = False
+        mRect = New Rectangle()
+        Point = New Point()
+        PointList = New List(Of Point)
+        ClippedPolygon = New List(Of Point) 'Store the finished polygon
+        Polygon = New List(Of List(Of Point)) 'List of PointList
+        'ClippingWindow = New Clippingwindow
+        ClippingWindowList = New List(Of Point) 'To store clipping window's coordinates
+        CutMode = False
+        CopyMode = False
+        PasteMode = False
+        DrawMode = True 'At the beginning of form's creation, you can only use draw mode
+        rectHeight = 0 'Height for the clipping window rectangle
+        rectWidth = 0 'Width for the clipping window width
+        PointNum = 0  'Number of points that have been inserted into the list
+        PolyENum = 0 'Number of polygon created
     End Sub
 
-    Private Sub ButtonClear_Click(sender As Object, e As EventArgs) Handles ButtonClear.Click
-        For i = 0 To MainCanvas.Width - 1
-            For j = 0 To MainCanvas.Height - 1
-                If (bitmapCanvas.GetPixel(i, j) <> Color.White) Then '<> is the same with !=
-                    bitmapCanvas.SetPixel(i, j, Color.White)
-                End If
+    Private Sub ButtonClear_Click(sender As Object, e As EventArgs) Handles ButtonClear.Click 'Clear the clipping window only
+        If (ClippingWindowList IsNot Nothing And ClippingWindowList.Count > 0) Then
+            Dim Point1, Point2, Point3, Point4 As Point
+            Point1 = New Point()
+            Point2 = New Point()
+            Point3 = New Point()
+            Point4 = New Point()
+
+            Point1 = ClippingWindowList(0)
+            Point2 = ClippingWindowList(1)
+            Point3 = ClippingWindowList(2)
+            Point4 = ClippingWindowList(3)
+
+            myGraphics = Graphics.FromImage(bitmapCanvas)
+            myGraphics.DrawLine(Pens.White, Point1.X, Point1.Y, Point2.X, Point2.Y)
+            myGraphics.DrawLine(Pens.White, Point2.X, Point2.Y, Point3.X, Point3.Y)
+            myGraphics.DrawLine(Pens.White, Point3.X, Point3.Y, Point4.X, Point4.Y)
+            myGraphics.DrawLine(Pens.White, Point4.X, Point4.Y, Point1.X, Point1.Y) 'Make all clipping window edges to white (delete this)
+
+            For i = 0 To Polygon.Count - 1 'Loop through polygon line and redraw all polygons
+                For j = 1 To Polygon(i).Count - 1
+                    Dim PointPoly1 As Point = Polygon(i)(j - 1)
+                    Dim PointPoly2 As Point = Polygon(i)(j)
+                    myGraphics.DrawLine(myPen, PointPoly1, PointPoly2)
+                Next
             Next
-        Next
-        MainCanvas.Image = bitmapCanvas
+            ClippingWindowList.Clear() 'Empty the list of point for clipping window after deleted
+        Else
+            MessageBox.Show("No clipping window detected!") 'LAST EDITED HERE On 6 November 2017 at 10:59 AM
+        End If
+        'PolygonList_ListBox.Items.Clear()
+        'PolyCoord_ListBox.Items.Clear()
+        'Polygon.Clear()
+        'PointList.Clear()
+        afterClip = False
+        DrawMode = True
+        CutMode = False
     End Sub
 
-    Private Function GetAbsolute(ByVal value As Integer) As Integer
-        If (value < 0) Then
-            value = value * -1
-        End If
-        Return value
-    End Function
-
-    Private Sub DrawLine(ByVal x1 As Integer, ByVal y1 As Integer, ByVal x2 As Integer, ByVal y2 As Integer) 'LAST EDITEDHERE - 27 October 2017 at 6:26 PM. YES I don't know the way to draw line if not using manual bitmap
-        ' Let's use MidPoint Line Algorithm (try) -> Kinda buggy and ultra pixelated, I need to redefine it... ._. LAST EDITED HERE - Wednesday, 18 October 2017 @7:34 PM
-
-        ' There are sixteen total cases in midpoint line algorithm -> Example using cartesian coordinates
-        '   1. To the right                            ---                      deltaY = 0, x1 < x2 -> SetPixel(x1, y1, Color)
-        '   2. To the left                             ---                      deltaY = 0, x1 > x2 -> SetPixel(-x1, y1, Color)
-        '   3. To the top                              ---                      deltaX = 0, y1 < y2  -> SetPixel(x1, y1, Color)
-        '   4. To the bottom                           ---                      deltaX = 0, y1 > y2 -> SetPixel(x1, -y1, Color)
-        '   5. 45 degree to top right                  ---                      deltaX = deltaY, x1 < x2, y1 < y2 -> SetPixel(x1, y1, Color)
-        '   6. 45 degree to bottom right               ---                      ABS(deltaX) = ABS(deltaY), x1 > x2, y1 > y2 -> SetPixel(x1, -y1, Color)
-        '   7. 45 degree to bottom left                ---                      ABS(deltaX) =  ABS(deltaY), Mirrored X axis plot -> SetPixel(-x1, -y1, Color)
-        '   8. 45 degree to top left                   ---                      deltaX = deltaY, Mirrored X axis plot -> SetPixel(-x1, y1, Color) --- LAST EDITED HERE, 29 October 2017 at 5:46 PM
-        '   9. Somewhere between 1 - 44 degree right y-axis above x-axis   ---  deltaX > deltaY -> SetPixel(x1, y1, Color) -> Traverse x-axis
-        '   10. Somewhere between 46 - 89 degree right y-axis above x-axis ---  deltaY > deltaX -> SetPixel(x1, y1, Color) -> Traverse y-axis
-        '   11. Somewhere between 46 - 89 degree left y-axis above x-axis  ---  deltaY > deltaX -> SetPixel(-x1, y1, Color) -> Traverse y-axis
-        '   12. Somewhere between 1 - 44 degree left y-axis above x-axis   ---  deltaX > deltaY -> SetPixel(-x1, y1, Color)-> Traverse x-axis
-        '   13. Somewhere between 1 - 44 degree left y-axis below x-axis   ---  deltaX > deltaY -> SetPixel(-x1, -y1, Color) -> Traverse x-axis
-        '   14. Somewhere between 46 - 89 degree left y-axis below x-axis  ---  deltaY > deltaX -> SetPixel(-x1, -y1, Color) -> Traverse y-axis
-        '   15. Somewhere between 1 - 44 degree right y-axis below x-axis  ---  deltaY > deltaX -> SetPixel(x1, -y1, Color) -> Traverse y-axis
-        '   16. Somewhere between 46 - 89 degree right y-axis below x-axis ---  deltaX > deltaY -> SetPixel(x1, -y1, Color) -> Traverse x-axis
-
-        Dim deltaX As Integer = x2 - x1 'Differences between x1 and x2
-        Dim deltaY As Integer = y2 - y1 'Differences between y1 and y2
-        'Dim deltaRight As Integer = 2 * deltaY ' LAST EDITED HERE, 28 October 2017 at 5:27 PM   --- deltaRight is the interval 
-        'Dim deltaUpperRight = 2 * (deltaY - deltaX) 'deltaUpperRight
-        'MessageBox.Show(deltaX.ToString() & ", " & deltaY.ToString())
-
-        If (deltaX <> 0 And deltaY = 0) Then 'Left and right
-            If (x1 < x2) Then
-                While x1 <= x2
-                    bitmapCanvas.SetPixel(x1, y1, Color.Black)
-                    x1 = x1 + 1
-                End While
-            Else
-                While x1 >= x2
-                    bitmapCanvas.SetPixel(x1, y1, Color.Black)
-                    x1 = x1 - 1
-                End While
-            End If
-        ElseIf (deltaX = 0 And deltaY <> 0) Then 'Up and down
-            If (y1 < y2) Then
-                While y1 <= y2
-                    bitmapCanvas.SetPixel(x1, y1, Color.Black)
-                    y1 = y1 + 1
-                End While
-            Else
-                While y1 >= y2
-                    bitmapCanvas.SetPixel(x1, y1, Color.Black)
-                    y1 = y1 - 1
-                End While
-            End If
-        ElseIf (GetAbsolute(deltaX) = GetAbsolute(deltaY)) Then '45 degree line
-            If (x1 < x2 And y1 < y2) Then
-                While x1 <= x2 And y1 <= y2
-                    bitmapCanvas.SetPixel(x1, y1, Color.Black)
-                    x1 = x1 + 1
-                    y1 = y1 + 1
-                End While
-            Else
-                While x1 >= x2 And y1 >= y2
-                    bitmapCanvas.SetPixel(x1, y1, Color.Black)
-                    x1 = x1 - 1
-                    y1 = y1 - 1
-                End While
-            End If
-        ElseIf (deltaX > deltaY) Then 'Diagonal not 45 degree (Case 9, 12, 13, 16)
-
-        ElseIf (deltaY > deltaX) Then 'Diagonal not 45 degree (Case 10, 11, 14, 15)
-
-        End If
-        MainCanvas.Image = bitmapCanvas
-    End Sub
-
-    'Private Sub DrawRect(ByRef PolyElement As TElementPolygon, ByRef NextPolyElement As TElementPolygon) 'Draw clipping window
-    '    Dim x1 As Integer = PolyElement.points.x 'Taken from the PolyElement
-    '    Dim x2 As Integer = NextPolyElement.points.x 'Taken from the PolyElement.nextPoint
-    '    Dim y1 As Integer = PolyElement.points.y
-    '    Dim y2 As Integer = NextPolyElement.points.y
-
-    '    If (x1 > x2) Then
-    '        While (x1 >= x2)
-    '            bitmapCanvas.SetPixel(x1, y1, Color.Black)
-    '            x1 = x1 - 1
-    '        End While
-    '    End If
-    '    MainCanvas.Image = bitmapCanvas
-    'End Sub
-
-    Private Function InsertPointNode(ByRef pointNode As TPoint, ByVal pointNum As Integer, ByVal x As Integer, ByVal y As Integer) As TPoint
-        If (pointNode Is Nothing) Then 'Newly allocated
-            pointNode = New TPoint
-            pointNode.setCoordinates(x, y)
-            pointNode.pointNum = pointNum
-        Else 'Already allocated
-            pointNode.nextPoint = InsertPointNode(pointNode.nextPoint, pointNode.pointNum + 1, x, y)
-        End If
-        Return pointNode
-    End Function
-
-    Private Sub InsertPolyElementNode(ByRef polyElement_Param As TElementPolygon, ByRef forHead As TElementPolygon, ByRef forTail As TElementPolygon, ByRef pointElement_Param As TPoint, ByVal x As Integer, ByVal y As Integer)
-        'If (polyElement_Param Is Nothing) Then 'First node of poly element
-        '    polyElement_Param = New TElementPolygon
-        '    polyElement_Param.numOfPoints = 1
-        '    polyElement_Param.points = InsertPointNode(polyElement_Param.points, x, y)
-        '    polyElement_Param.nextPoint = Nothing
-        '    forHead = polyElement_Param
-        '    forTail = polyElement_Param
-        'ElseIf (forTail IsNot Nothing And forTail.nextPoint Is Nothing) Then 'Last Node of poly element
-        '    Dim temp As TElementPolygon
-        '    temp = New TElementPolygon
-        '    forTail.nextPoint = temp
-        '    forTail = temp
-        '    polyElement_Param.numOfPoints = polyElement_Param.numOfPoints + 1 'Number of points increased
-        'End If
-    End Sub
-
-    'Private Function MakePolygon(ByRef Polygon_Param As TPolygon, ByRef PolygonElement_Param As TElementPolygon) As TPolygon 'Make a new polygon Last edited here on 27 October 2017 at 10:52 AM
-    '    Return Polygon_Param
-    'End Function
-
-    'Private _Previous As System.Nullable(Of Point) = Nothing
     Private Sub MainCanvas_MouseDown(sender As Object, e As MouseEventArgs) Handles MainCanvas.MouseDown ' Mouse down, get the x, y coordinates
-        X1 = e.X
-        Y1 = e.Y
-        ListOfPoints = InsertPointNode(ListOfPoints, PointNum, X1, Y1)
         pressedButton = True
-        'points = InsertPointNode(points, e.X, e.Y)
-        ' _Previous = e.Location
-        'MainCanvas_MouseMove(sender, e)
+        If (CutMode) And Not afterClip Then
+            Clip_X1 = e.X
+            Clip_Y1 = e.Y
+            Point.X = Clip_X1
+            Point.Y = Clip_Y1
+            x = e.X
+            y = e.Y
+        ElseIf (DrawMode) Then
+            x = e.X
+            y = e.Y
+            PointList.Add(New Point(e.X, e.Y)) 'Get point coordinate each click
+            PointNum = PointNum + 1
+        End If
     End Sub
 
     Private Sub AboutMeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AboutMeToolStripMenuItem.Click 'When you click the about me
@@ -179,101 +103,265 @@
             "Coding" & vbTab & vbTab & "1 Kristoforus Kurniawan" & vbNewLine & vbTab & vbTab & "2 Ardy Wijaya", "About Me", MessageBoxButtons.OK)
     End Sub
 
-    Private Sub SaveCtrlSToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveCtrlSToolStripMenuItem.Click 'When you click save
+    Private Sub SaveIt()
+        Dim save As New SaveFileDialog
+        save.Filter = "JPG files (*.jpg)|*.jpg|Bitmaps (*.bmp)|*.bmp|Png(*.png)|*.png"
+        If (save.ShowDialog = DialogResult.OK) Then
+            bitmapCanvas.Save(save.FileName)
+        End If
+    End Sub
 
+    Private Sub OpenIt()
+        Dim open As New OpenFileDialog
+        open.Filter = "JPG files (*.jpg)|*.jpg|Bitmaps (*.bmp)|*.bmp|Png(*.png)|*.png"
+        If (open.ShowDialog = DialogResult.OK) Then
+            bitmapCanvas = System.Drawing.Image.FromFile(open.FileName)
+            MainCanvas.Image = bitmapCanvas
+        End If
+    End Sub
+
+    Private Sub SaveCtrlSToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveCtrlSToolStripMenuItem.Click 'When you click save
+        SaveIt()
     End Sub
 
     Private Sub OpenCtrlOToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenCtrlOToolStripMenuItem.Click 'When you click open
-
+        OpenIt()
     End Sub
 
-    Private Sub MainCanvas_MouseMove(sender As Object, e As MouseEventArgs) Handles MainCanvas.MouseMove
-        CoordinateLabel.Text = "X = " & e.X.ToString() & ", Y = " & e.Y.ToString()
-        If (pressedButton) Then
-            Dim tempX2 As Integer = e.X 'If the button is still pressed, store temporary X2
-            Dim tempY2 As Integer = e.Y 'and y2 as current mouse position
-            'Dim tempPoint As TPoint = Nothing
-            'Dim PointF1, PointF2 As Point
-            'tempPoint = InsertPointNode(tempPoint, ListOfPoints.pointNum + 1, tempX2, tempY2)
-            'PointF1 = New Point
-            'PointF2 = New Point
-            'PointF1.X = ListOfPoints.x
-            'PointF1.Y = ListOfPoints.y
-            'PointF2.X = tempPoint.x
-            'PointF2.Y = tempPoint.y
+    Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
+        Me.Close()
+    End Sub
 
-            '    Dim temporaryPoint2 As TPoint = Nothing
-            '    temporaryPoint2 = InsertPointNode(temporaryPoint2, e.X, e.Y) 'Temporary point while mouse is moving
-            '    Dim PointF1, PointF2 As Point
-            '    PointF1 = New Point
-            '    PointF2 = New Point
-            '    PointF1.X = headPolyElement.points.x
-            '    PointF1.Y = headPolyElement.points.y
-            '    PointF2.X = temporaryPoint2.x
-            '    PointF2.Y = temporaryPoint2.y
-            '    Using myGraphics As Graphics = Graphics.FromImage(MainCanvas.Image)
-            '        myGraphics.DrawLine(myPen, PointF1, PointF2)
-            '        MainCanvas.Invalidate()
-            '        PointF1 = PointF2
-            '    End Using
+    Private Sub InsertClipWindowCoordinate(ByRef Point1 As Point, ByRef Point2 As Point, ByRef Point3 As Point, ByRef Point4 As Point) 'Insert points for clipping window (for traversing)
+        ClippingWindowList.Add(Point1)
+        ClippingWindowList.Add(Point2)
+        ClippingWindowList.Add(Point3)
+        ClippingWindowList.Add(Point4)
+    End Sub
+
+    Private Sub ButtonCut_Click(sender As Object, e As EventArgs) Handles ButtonCut.Click
+        If (Not CutMode) Then
+            CutMode = True
+            DrawMode = False
+        ElseIf (CutMode And Polygon.Count > 0) Then 'Cut mode is activated and polygon has been drawn
+            InsertClipWindowCoordinate(Point1_Clip, Point2_Clip, Point3_Clip, Point4_Clip) 'Insert all 4 points into a list of points once the clipping window has been drawn
+            SutherlandHodgman(Polygon, ClippingWindowList, ClippedPolygon, SelectedPolyIndex)
+            'For i = 0 To ClippingWindowList.Count - 1
+            '    MessageBox.Show("Point " & i + 1.ToString() & " X = " & ClippingWindowList(i).X.ToString() & ", Y = " & ClippingWindowList(i).Y.ToString()) 'Checking if clipping windows point has been stored
+            'Next
         End If
-        'If _Previous IsNot Nothing Then
-        '    If MainCanvas.Image Is Nothing Then
-        '        Dim bmp As New Bitmap(MainCanvas.Width, MainCanvas.Height)
-        '        Using g As Graphics = Graphics.FromImage(bmp)
-        '            g.Clear(Color.White)
-        '        End Using
-        '        MainCanvas.Image = bmp
-        '    End If
-        '    Using g As Graphics = Graphics.FromImage(MainCanvas.Image)
-        '        g.DrawLine(Pens.Black, _Previous.Value, e.Location)
-        '    End Using
-        '    MainCanvas.Invalidate()
-        '    _Previous = e.Location
-        'End If
+    End Sub
+
+    Private Sub DrawClipWindow(ByRef myGraphics As Graphics, ByRef bitmapCanvas As Bitmap) 'Drawing rectangle for clipping window
+        myGraphics = Graphics.FromImage(bitmapCanvas)
+        myGraphics.DrawLine(myPen, Clip_X1, Clip_Y1, Clip_X2, Clip_Y1)
+        myGraphics.DrawLine(myPen, Clip_X2, Clip_Y1, Clip_X2, Clip_Y2)
+        myGraphics.DrawLine(myPen, Clip_X2, Clip_Y2, Clip_X1, Clip_Y2)
+        myGraphics.DrawLine(myPen, Clip_X1, Clip_Y2, Clip_X1, Clip_Y1) 'LAST EDITED HERE ON 3 November 2017 at 11:52 PM
+
+        Point1_Clip.X = Clip_X1
+        Point1_Clip.Y = Clip_Y1
+
+        Point2_Clip.X = Clip_X2
+        Point2_Clip.Y = Clip_Y1
+
+        Point3_Clip.X = Clip_X2
+        Point3_Clip.Y = Clip_Y2
+
+        Point4_Clip.X = Clip_X1
+        Point4_Clip.Y = Clip_Y2
+    End Sub
+
+    Private Sub PolygonList_ListBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles PolygonList_ListBox.SelectedIndexChanged 'This method shows the coordinate lists for the selected polygon
+        PolyCoord_ListBox.Items.Clear()
+        Dim PolyCoord As String = ""
+        Dim i As Integer = PolygonList_ListBox.SelectedIndex
+        SelectedPolyIndex = i
+        If (i >= 0) Then
+            For j = 0 To Polygon(i).Count - 1
+                PolyCoord = "X = " & Polygon(i)(j).X.ToString() & ", Y = " & Polygon(i)(j).Y.ToString() + vbNewLine
+                PolyCoord_ListBox.Items.Add(PolyCoord)
+            Next
+        Else
+            MessageBox.Show("Please click exactly on the polygon list!")
+        End If
+    End Sub
+
+    Private Sub CheckMousePosition(e As MouseEventArgs) 'This method handles the label when we draw rectangle using mouse move
+        If e.X >= 0 And e.Y >= 0 And e.X <= MainCanvas.Width And e.Y <= MainCanvas.Height Then
+            CoordinateLabel.Text = "X = " & e.X.ToString() & ", y = " & e.Y.ToString()
+        ElseIf e.X < 0 And e.Y < 0 Then
+            CoordinateLabel.Text = "X = 0, y = 0"
+        ElseIf e.X < 0 Then
+            CoordinateLabel.Text = "X = 0" & ", y = " & e.Y.ToString()
+        ElseIf e.Y < 0 Then
+            CoordinateLabel.Text = "X = " & e.X.ToString() & ", y = 0"
+        ElseIf e.X > MainCanvas.Width Then
+            CoordinateLabel.Text = "X = " & MainCanvas.Width.ToString() & ", y = " & e.Y.ToString()
+        ElseIf e.Y > MainCanvas.Height Then
+            CoordinateLabel.Text = "X = " & e.X.ToString() & ", y = " & MainCanvas.Height.ToString()
+        ElseIf e.Y > MainCanvas.Height And e.X > MainCanvas.Width Then
+            CoordinateLabel.Text = "X = " & MainCanvas.Width.ToString() & ", y = " & MainCanvas.Height.ToString()
+        End If ' All these if-else limits the minimum point to 0 when exceeds the MainCanvas
+    End Sub
+
+    Public Sub MainCanvas_MouseMove(sender As Object, e As MouseEventArgs) Handles MainCanvas.MouseMove
+        CoordinateLabel.Text = "X = " & e.X.ToString() & ", Y = " & e.Y.ToString()
+        newBitmap = bitmapCanvas.Clone()
+        myGraphics = Graphics.FromImage(newBitmap)
+        If (pressedButton) Then
+            If (CutMode) Then
+                'CheckMousePosition(e)
+                mRect.X = x
+                mRect.Y = y
+                'If e.X <= PictureBox1.Width And e.X >= 0 - PictureBox1.Width Then
+                If e.X >= 0 And e.X < mRect.X Then
+                    mRect.Width = mRect.X - e.X
+                    mRect.X = e.X
+                ElseIf e.X < 0 And e.X < mRect.X Then
+                    'mRect.Width = mRect.X
+                    mRect.X = 0
+                ElseIf e.X < MainCanvas.Width Then
+                    mRect.Width = e.X - mRect.X
+                    '     End If
+                End If
+                '   If e.Y <= PictureBox1.Height And e.Y >= 0 Then
+                If e.Y > 0 And e.Y < mRect.Y Then
+                    mRect.Height = mRect.Y - e.Y
+                    mRect.Y = e.Y
+                ElseIf e.Y < 0 And e.Y < mRect.Y Then
+                    '  mRect.Height = mRect.Y
+                    mRect.Y = 0
+                ElseIf e.Y < MainCanvas.Height Then
+                    mRect.Height = e.Y - mRect.Y
+                End If
+                myGraphics.DrawRectangle(myPen, mRect)
+            ElseIf (DrawMode) Then
+            End If
+        End If
+        MainCanvas.Image = newBitmap
     End Sub
 
     Private Sub MainCanvas_MouseUp(sender As Object, e As MouseEventArgs) Handles MainCanvas.MouseUp 'Get the final position from mouse, draw on bitmapCanvas
-        X2 = e.X 'Store second
-        Y2 = e.Y
-        PointNum = PointNum + 1
-        ListOfPoints = InsertPointNode(ListOfPoints, PointNum, X2, Y2)
         pressedButton = False
-        'MessageBox.Show(X1.ToString() & ", " & Y1.ToString() & ", " & X2.ToString() & ", " & Y2.ToString())
-        DrawLine(X1, Y1, X2, Y2)
-        'Dim PointF1, PointF2 As Point
-
-        'Using myGraphics As Graphics = Graphics.FromImage(bitmapCanvas)
-        '    While (ListOfPoints IsNot Nothing)
-        '        PointF1.X = ListOfPoints.x
-        '        PointF1.Y = ListOfPoints.y
-        '        PointF2.X = X2
-        '        PointF2.Y = Y2
-        '        myGraphics.DrawLine(myPen, PointF1, PointF2)
-        '        MainCanvas.Invalidate()
-        '        ListOfPoints = ListOfPoints.nextPoint
-        '        'ListOfPoints.nextPoint = ListOfPoints.nextPoint.nextPoint
-        '    End While
-        'End Using
-        'If (ListOfPoints IsNot Nothing) Then
-        '    MessageBox.Show("PointList is not nothing")
-        'Else
-        '    MessageBox.Show("PointList is still nothing")
-        'End If
-        'headPolyElement.nextPoint = InsertPolyElementNode(headPolyElement.nextPoint, points, e.X, e.Y) 'Last edited here on 26 October 2017 at 10:53 PM  --- Insert end point of the line into poly element
-        '_Previous = Nothing
+        Dim i As Integer
+        Dim FirstPoint As Point = New Point()
+        Dim SecondPoint As Point = New Point()
+        Dim LastPoint As Point = New Point()
+        If (CutMode And Not afterClip) Then
+            mRect.X = x
+            mRect.Y = y
+            Clip_X2 = e.X
+            Clip_Y2 = e.Y
+            DrawClipWindow(myGraphics, bitmapCanvas)
+        ElseIf (DrawMode) Then
+            If (PointList) IsNot Nothing Then
+                For i = 1 To PointList.Count - 1
+                    FirstPoint = PointList(i - 1)
+                    SecondPoint = PointList(i)
+                    myGraphics = Graphics.FromImage(bitmapCanvas)
+                Next
+            End If
+            myGraphics.DrawLine(myPen, FirstPoint, SecondPoint) 'LAST EDITED HERE 3 November 2017 at 12:01 AM
+        End If
+        MainCanvas.Image = bitmapCanvas
     End Sub
 
     Private Sub ButtonFinishPolygon_Click(sender As Object, e As EventArgs) Handles ButtonFinishPolygon.Click 'When this button is clicked, Traverse through all polygon points and make one new polygon
-        While ListOfPoints IsNot Nothing
-            MessageBox.Show("Point " & ListOfPoints.pointNum.ToString() & " X = " & ListOfPoints.x.ToString() & ", Y = " & ListOfPoints.y.ToString())
-            ListOfPoints = ListOfPoints.nextPoint
-        End While
-        'If (headPolyElement IsNot Nothing) Then
-        '    MessageBox.Show("Not Nothing")
-        'Else
-        '    MessageBox.Show("Still Nothing")
-        'End If
+        Dim PolyListLoop As Integer
+        Dim PolyObjStr As String = ""
+        Dim PolyCoordStr As String = ""
+        If PointList IsNot Nothing Then
+            Try
+                Using myGraphics As Graphics = Graphics.FromImage(bitmapCanvas)
+                    myGraphics.DrawLine(myPen, PointList(0), PointList(PointList.Count - 1))
+                    MainCanvas.Image = bitmapCanvas
+                End Using
+
+                If (PointNum >= 3) Then 'Polygon only created when the number of points is at least 3
+                    Dim tempPointList As List(Of Point) = New List(Of Point)
+
+                    If (tempPointList IsNot Nothing) Then 'Clean the tempPoint before inserting new Point to prevent previous polygon's point to be repeated
+                        tempPointList.Clear()
+                    End If
+
+                    For Each Point As Point In PointList 'Entirely copy the value of PointList into tempPointList
+                        tempPointList.Add(New Point(Point))
+                    Next
+
+                    Polygon.Add(tempPointList)
+                    PointList.Clear() 'After each polygon creation, clear the point list (since it has been stored in the polygon).
+                    PointNum = 0 'Reset the number of points to 0 LAST EDITED HERE ON 2 November 2017 at 12:56 PM
+
+                    For PolyListLoop = 0 To Polygon.Count - 1
+                        PolyObjStr = "Polygon " & PolyListLoop + 1.ToString() & vbNewLine
+                    Next
+                    PolygonList_ListBox.Items.Add(PolyObjStr)
+                End If
+            Catch ex As Exception
+                MessageBox.Show("It looks like you whether haven't drawn anything or clicked the finish polygon twice. This message prevents the program from crashing and will restart the program." &
+                                vbNewLine & vbNewLine & ex.Message.ToString(), "Error!")
+                Application.Restart()
+            End Try
+        End If
     End Sub
 
+    'Sutherland-Hodgman algorithm method, we will be using NLeft since the DrawClipWindow method uses an anti-clockwise direction
+    'Kinda stuck here on the calculation part
+    Private Sub SutherlandHodgman(ByRef Polygon As List(Of List(Of Point)), ByRef ClippingWindowPointList As List(Of Point), ByRef ClippedPolygon As List(Of Point), ByVal SelectedPolyIndex As Integer)
+        If (SelectedPolyIndex >= 0) Then 'Polygon has been selected from the poly listbox
+            Dim NormalRight As New List(Of System.Windows.Vector)
+            Dim NormalLeft As New List(Of System.Windows.Vector)
+            Dim ClipWinEdge As New List(Of System.Windows.Vector) 'LAST EDITED HERE On 3 November 2017 at 8:05 PM
+            Dim i As Integer = 1
+            Dim j As Integer = 0
+
+            While (i <= ClippingWindowList.Count And j < ClippingWindowList.Count) 'Insert clipping window edge into a list of vector
+                If i = ClippingWindowList.Count Then
+                    i = 0
+                End If
+                ClipWinEdge.Add(New System.Windows.Vector(ClippingWindowList(i).X - ClippingWindowList(j).X, ClippingWindowList(i).Y - ClippingWindowList(j).Y))
+                i = i + 1
+                j = j + 1
+            End While
+
+            'For abc As Integer = 0 To Polygon(SelectedPolyIndex).Count - 1
+            '    MessageBox.Show("Polygon with index " & SelectedPolyIndex.ToString() & " X = " & Polygon(SelectedPolyIndex)(abc).X.ToString() & ", Y = " & Polygon(SelectedPolyIndex)(abc).Y.ToString())
+            'Next
+
+            'For a As Integer = 0 To ClipWinEdge.Count - 1
+            '    MessageBox.Show("Edge " & a + 1.ToString() & "X = " & ClipWinEdge(a).X.ToString() & ", Y = " & ClipWinEdge(a).Y.ToString())
+            'Next
+
+            If ((ClippingWindowList(0).X < ClippingWindowList(2).X And ClippingWindowList(0).Y < ClippingWindowList(2).Y) Or (ClippingWindowList(0).X > ClippingWindowList(2).X And ClippingWindowList(0).Y > ClippingWindowList(2).Y)) Then 'NRight
+                For edgeIndex As Integer = 0 To ClipWinEdge.Count - 1 'Insert the normal vector into a list
+                    NormalRight.Add(New System.Windows.Vector(ClipWinEdge(edgeIndex).Y, -ClipWinEdge(edgeIndex).X))  'NormalRight is y, -x of edge vector
+                    j = j + 1
+                Next
+
+                For a As Integer = 0 To ClipWinEdge.Count - 1
+                    MessageBox.Show("X = " & NormalRight(a).X.ToString() & ", Y = " & NormalRight(a).Y.ToString())
+                Next
+
+            ElseIf ((ClippingWindowList(0).X < ClippingWindowList(2).X And ClippingWindowList(0).Y > ClippingWindowList(2).Y) Or (ClippingWindowList(0).X > ClippingWindowList(2).X And ClippingWindowList(0).Y < ClippingWindowList(2).Y)) Then 'NLeft
+                For edgeIndex As Integer = 0 To ClipWinEdge.Count - 1 'Insert the normal vector into a list
+                    NormalLeft.Add(New System.Windows.Vector(-ClipWinEdge(edgeIndex).Y, ClipWinEdge(edgeIndex).X))  'NormalRight is y, -x of edge vector
+                    j = j + 1
+                Next
+
+                For a As Integer = 0 To ClipWinEdge.Count - 1
+                    MessageBox.Show("X = " & NormalLeft(a).X.ToString() & ", Y = " & NormalLeft(a).Y.ToString())
+                Next
+
+            Else
+                MessageBox.Show("Please draw a proper clipping window")
+            End If
+
+            CutMode = False
+            DrawMode = True
+            PointList.Clear() 'LAST EDITED HERE On 4 November 2017 at 12:51 AM
+        Else
+            MessageBox.Show("Please select which polygon to be clipped.")
+        End If
+    End Sub
 End Class

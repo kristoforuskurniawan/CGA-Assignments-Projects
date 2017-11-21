@@ -1,42 +1,125 @@
 ﻿Public Class PolygonClipping
-    Dim bitmap, clippingWindowAnimation As Bitmap
+    Dim bitmapCanvas, clippingWindowAnimation As Bitmap
     Dim graphics, Animation As Graphics
-    Dim Polygon As List(Of Point) = Nothing
     Dim StartPoint As Point 'For the starter point
     Dim ListOfPolygon As List(Of List(Of Point))
-    Dim isClipping, isMultipleMode, isSingleMode, isMouseDown, isClippingDone As Boolean
+    Dim isClipping, isMultipleMode, isMouseDown, isClippingDone, PolyListIndexReady As Boolean
     Dim mRect As Rectangle
-    Dim clippingWindowPoint As List(Of Point)
-    'Dim Point1, Point2, Point3, Point4 As Point 'clipping window edge
-    Dim x, y, SelectedPolyIndex As Integer
-    Dim PolyOut As List(Of Point)
+    Dim Polygon, PolyOut, ClippedPoly, clippingWindowPoint As List(Of Point)
+    Dim x, y, SelectedPolyIndex, SelectedPolyPointIndex As Integer
+
     Private Sub PolygonClipping_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ClippedPoly = New List(Of Point)
+        PolyListIndexReady = False 'Tells the program that I have selected a specific polygon from a listbox to be processed with Sutherland-Hodgman
+        SelectedPolyPointIndex = -1
         graphics = CreateGraphics()
-        'create bitmap that fits the form
-        bitmap = New Bitmap(MainCanvas.Width, MainCanvas.Height)
-        graphics = Graphics.FromImage(bitmap)
+        bitmapCanvas = New Bitmap(MainCanvas.Width, MainCanvas.Height) 'Create bitmap for the form
+        Polygon = Nothing
+        graphics = Graphics.FromImage(bitmapCanvas)
         graphics.Clear(Color.White)
-        MainCanvas.Image = bitmap
-        'Clipping window points
-        'Point1 = New Point()
-        'Point2 = New Point()
-        'Point3 = New Point()
-        'Point4 = New Point()
+        MainCanvas.Image = bitmapCanvas
         PolyOut = New List(Of Point)
         ListOfPolygon = New List(Of List(Of Point))
-        clippingWindowPoint = New List(Of Point)
+        'ListOfClippedPoly = New List(Of List(Of Point)) 'Handle multiple polygon
+        clippingWindowPoint = New List(Of Point) 'Clipping window points
+        isMultipleMode = True
+        isClipping = False
+        multipleLbl.Text += " On"
+        modeLbl.Text += " Off"
     End Sub
+
+    Private Sub PolyPoint_TextBox_KeyDown(sender As Object, e As KeyEventArgs) Handles PolyPoint_TextBox.KeyDown
+        If e.KeyCode = Keys.Enter Then
+            Dim forX, forY As String
+            Dim i As Integer = 0
+            Dim newX, newY As Integer
+            newX = 0
+            newY = 0
+            forX = ""
+            forY = ""
+            If SelectedPolyIndex <> -1 And SelectedPolyPointIndex <> -1 Then
+                While (i < PolyPoint_TextBox.Text.Count - 1 And PolyPoint_TextBox.Text(i) <> ",") 'Keeps reading until ',' is found
+                    forX += PolyPoint_TextBox.Text(i)
+                    i = i + 1
+                End While
+
+                i = i + 2 'Start after white space
+
+                While i < PolyPoint_TextBox.Text.Count
+                    forY += PolyPoint_TextBox.Text(i)
+                    i = i + 1
+                End While
+
+                newX = newX + Integer.Parse(forX)
+                newY = newY + Integer.Parse(forY)
+
+                For B As Integer = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1
+                    If B = SelectedPolyPointIndex Then
+                        ListOfPolygon(SelectedPolyIndex).RemoveAt(B)
+                        ListOfPolygon(SelectedPolyIndex).Insert(B, New Point(newX, newY))
+                    End If
+                Next
+
+                coordinatesListBox.Items.Clear()
+                Dim PolyCoordinates As String = ""
+                For j = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1 'Write back the inside of polygon coordinate listbox
+                    PolyCoordinates = "X = " & ListOfPolygon(SelectedPolyIndex)(j).X.ToString() & ", Y = " & ListOfPolygon(SelectedPolyIndex)(j).Y.ToString() + vbNewLine
+                    coordinatesListBox.Items.Add(PolyCoordinates)
+                Next
+
+                ' Then redraw the selected polygon
+                graphics.Clear(Color.White)
+                For polyIndex As Integer = 0 To ListOfPolygon.Count - 1
+                    For p As Integer = 1 To ListOfPolygon(polyIndex).Count - 1
+                        If p = ListOfPolygon(polyIndex).Count - 1 Then
+                            graphics.DrawLine(Pens.Black, ListOfPolygon(polyIndex)(0), ListOfPolygon(polyIndex)(p))
+                        End If
+                        graphics.DrawLine(Pens.Black, ListOfPolygon(polyIndex)(p - 1), ListOfPolygon(polyIndex)(p))
+                    Next
+                Next
+                MainCanvas.Image = bitmapCanvas
+            Else
+                MessageBox.Show("Please draw polygon first!")
+            End If
+        End If
+    End Sub
+
+    Private Sub SaveToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveToolStripMenuItem.Click 'Saving polygon as a text file
+        Dim saveFileDialog1 As New SaveFileDialog()
+        Dim pointPoly As String = ""
+        If ListOfPolygon IsNot Nothing Then
+            For i = 0 To ListOfPolygon.Count - 1
+                pointPoly += "Polygon " & (i + 1).ToString() + vbNewLine
+                For j = 1 To ListOfPolygon(i).Count  '3
+                    Dim PointPoly1 As Point = ListOfPolygon(i)(j - 1) '0 0 0 1 0 2
+                    Dim PointPoly2 As Point = ListOfPolygon(i)(j Mod ListOfPolygon(i).Count) '0 1 0 2
+                    pointPoly += "X = " & ListOfPolygon(i)(j - 1).X.ToString() & ", Y = " & ListOfPolygon(i)(j - 1).Y.ToString() + vbNewLine
+                Next
+            Next
+        End If
+        saveFileDialog1.Filter = "txt files (*.txt)|*.txt"
+        saveFileDialog1.FilterIndex = 2
+        saveFileDialog1.RestoreDirectory = True
+        If saveFileDialog1.ShowDialog() = DialogResult.OK Then
+            System.IO.File.WriteAllText(saveFileDialog1.FileName, pointPoly)
+        End If
+    End Sub
+
+    Private Sub OpenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem.Click
+
+    End Sub
+
     Private Sub MainCanvas_MouseDown(sender As Object, e As MouseEventArgs) Handles MainCanvas.MouseDown
         isMouseDown = True
-        If isClipping And Not isMultipleMode And Not isSingleMode Then
+        If isClipping And Not isMultipleMode Then
             graphics.Clear(Color.White)
             PolyOut.Clear()
             insertPolygon()
             x = e.X
             y = e.Y
-        ElseIf isMultipleMode And Not isClipping And Not isSingleMode Then
+        ElseIf isMultipleMode And Not isClipping Then
             insertPointPolygon(e)
-        ElseIf isSingleMode And Not isClipping And Not isMultipleMode Then
+        ElseIf Not isClipping And Not isMultipleMode Then
             If ListOfPolygon.Count = 0 Then
                 insertPointPolygon(e)
             Else
@@ -58,8 +141,8 @@
                 Polygon.Add(e.Location)
             End If
         End If
-        MainCanvas.Invalidate()
     End Sub
+
     Private Sub MainCanvas_MouseMove(sender As Object, e As MouseEventArgs) Handles MainCanvas.MouseMove
         If e.X >= 0 And e.Y >= 0 And e.X <= MainCanvas.Width And e.Y <= MainCanvas.Height Then
             coorLbl.Text = "X = " & e.X.ToString() & ", Y = " & e.Y.ToString()
@@ -76,10 +159,10 @@
         ElseIf e.Y > MainCanvas.Height And e.X > MainCanvas.Width Then
             coorLbl.Text = "X = " & MainCanvas.Width.ToString() & ", Y = " & MainCanvas.Height.ToString()
         End If
-        clippingWindowAnimation = bitmap.Clone()
+        clippingWindowAnimation = bitmapCanvas.Clone()
         Animation = Graphics.FromImage(clippingWindowAnimation)
         If isMouseDown = True Then
-            If isClipping And Not isMultipleMode And Not isSingleMode Then
+            If isClipping And Not isMultipleMode Then
                 ClipWindow(e)
                 Animation.DrawRectangle(New Pen(Color.Black, 1), mRect)
             End If
@@ -87,24 +170,29 @@
         MainCanvas.Image = clippingWindowAnimation 'put bitmap on the picture box
         MainCanvas.Invalidate()
     End Sub
+
     Private Sub MainCanvas_MouseUp(sender As Object, e As MouseEventArgs) Handles MainCanvas.MouseUp 'Get the final position from mouse, draw on bitmapCanvas
-        If isClipping And Not isMultipleMode And Not isSingleMode Then
+
+        If ClippedPoly IsNot Nothing Then 'Empty the clipped polygon list after mouse up
+            ClippedPoly.Clear()
+        End If
+
+        If isClipping Then
             ClipWindow(e)
             clippingWindowPoint.Add(New Point(mRect.X, mRect.Y))
             clippingWindowPoint.Add(New Point(mRect.X + mRect.Width, mRect.Y))
             clippingWindowPoint.Add(New Point(mRect.X + mRect.Width, mRect.Y + mRect.Height))
             clippingWindowPoint.Add(New Point(mRect.X, mRect.Y + mRect.Height))
             graphics.DrawRectangle(New Pen(Color.Black, 1), mRect)
-            SutherlandHodgman(ListOfPolygon, clippingWindowPoint, PolyOut, SelectedPolyIndex)
-        ElseIf isMultipleMode And Not isClipping And Not isSingleMode Then
+            findNormal(ListOfPolygon, clippingWindowPoint)
+        ElseIf isMultipleMode And Not isClipping Then
             drawPolygon(Polygon)
-        ElseIf isSingleMode And Not isClipping And Not isMultipleMode Then
+        ElseIf isClipping And Not isMultipleMode Then
             drawPolygon(Polygon)
         End If
-        'MainCanvas.Image = bitmap
-        'showClippingWindowPoint(clippingWindowPoint)
         isMouseDown = False
     End Sub
+
     Private Sub drawPolygon(ByRef polygonPoints As List(Of Point))
         Dim FirstPoint As Point = New Point()
         Dim SecondPoint As Point = New Point()
@@ -112,112 +200,96 @@
             For i = 1 To Polygon.Count - 1
                 FirstPoint = Polygon(i - 1)
                 SecondPoint = Polygon(i)
-                graphics = Graphics.FromImage(bitmap)
+                graphics = Graphics.FromImage(bitmapCanvas)
                 graphics.DrawLine(Pens.Black, FirstPoint, SecondPoint)
             Next
         End If
     End Sub
-    Private Sub multipleBtn_Click(sender As Object, e As EventArgs) Handles multipleBtn.Click 'When this button is clicked, Traverse through all polygon points and make one new polygon
-        If isMultipleMode = True Then
-            isMultipleMode = False
-            multipleLbl.Text = "Multiple Mode: Off"
-        Else
-            isMultipleMode = True
-            isClipping = False
-            isSingleMode = False
-            multipleLbl.Text = "Multiple Mode: On"
-            modeLbl.Text = "Clipping Mode: Off"
-            singleLbl.Text = "Single Mode: Off"
-        End If
-    End Sub
+
     Private Sub clippingBtn_Click(sender As Object, e As EventArgs) Handles clippingBtn.Click
         If isClipping = True Then
             isClipping = False
             modeLbl.Text = "Clipping Mode: Off"
         Else
             isClipping = True
-            isSingleMode = False
             isMultipleMode = False
             modeLbl.Text = "Clipping Mode: On"
-            singleLbl.Text = "Single Mode: Off"
             multipleLbl.Text = "Multiple Mode: Off"
         End If
     End Sub
-    Private Sub singleBtn_Click(sender As Object, e As EventArgs) Handles singleBtn.Click
-        If isSingleMode = True Then
-            isSingleMode = False
-            singleLbl.Text = "Single Mode: Off"
+
+    Private Sub coordinatesListBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles coordinatesListBox.SelectedIndexChanged
+        If coordinatesListBox.SelectedIndex >= 0 Then
+            SelectedPolyPointIndex = coordinatesListBox.SelectedIndex
+            PolyPoint_TextBox.Text = ListOfPolygon(SelectedPolyIndex)(SelectedPolyPointIndex).X.ToString() & ", " & ListOfPolygon(SelectedPolyIndex)(SelectedPolyPointIndex).Y.ToString()
         Else
-            isSingleMode = True
-            isClipping = False
-            isMultipleMode = False
-            singleLbl.Text = "Single Mode: On"
-            modeLbl.Text = "Clipping Mode: Off"
-            multipleLbl.Text = "Multiple Mode: Off"
+            SelectedPolyPointIndex = -1
         End If
     End Sub
-    'Private Sub SaveToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveToolStripMenuItem.Click
-    '    Dim save As New SaveFileDialog
-    '    save.Filter = "JPG files (*.jpg)|*.jpg|Bitmaps (*.bmp)|*.bmp|Png(*.png)|*.png"
-    '    If (save.ShowDialog = DialogResult.OK) Then
-    '        bitmap.Save(save.FileName)
-    '    End If
-    'End Sub
-    'Private Sub OpenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem.Click
-    '    Dim open As New OpenFileDialog
-    '    open.Filter = "JPG files (*.jpg)|*.jpg|Bitmaps (*.bmp)|*.bmp|Png(*.png)|*.png"
-    '    If (open.ShowDialog = DialogResult.OK) Then
-    '        bitmap = System.Drawing.Image.FromFile(open.FileName)
-    '        MainCanvas.Image = bitmap
-    '    End If
-    'End Sub
+
+    Private Sub DeletePointButton_Click(sender As Object, e As EventArgs) Handles DeletePointButton.Click
+        Dim SpecialPen As Pen = Nothing
+
+        If SelectedPolyIndex < 0 Or SelectedPolyPointIndex < 0 Then
+            MessageBox.Show("Please select the polygon and point to be edited!")
+        End If
+
+        If ListOfPolygon(SelectedPolyIndex).Count > 3 Then 'At least 3 points inside polygon
+            ListOfPolygon(SelectedPolyIndex).RemoveAt(SelectedPolyPointIndex)
+            graphics.Clear(Color.White)
+            For polyIndex As Integer = 0 To ListOfPolygon.Count - 1
+                ReDrawPolygon(SpecialPen, Color.Black, 1, ListOfPolygon(polyIndex))
+            Next
+
+            coordinatesListBox.Items.Clear()
+            Dim PolyCoordinates As String = ""
+            For j = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1 'Write back the inside of polygon coordinate listbox
+                PolyCoordinates = "X = " & ListOfPolygon(SelectedPolyIndex)(j).X.ToString() & ", Y = " & ListOfPolygon(SelectedPolyIndex)(j).Y.ToString() + vbNewLine
+                coordinatesListBox.Items.Add(PolyCoordinates)
+            Next
+
+        Else 'Less than 3 points
+            MessageBox.Show("Cannot delete any point from this polygon since the mininum is 3 points!")
+        End If
+        MainCanvas.Image = bitmapCanvas
+    End Sub
+
     Private Sub polygonListBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles polygonListBox.SelectedIndexChanged
+        Dim testPen As Pen = Nothing
+        If SelectedPolyIndex = polygonListBox.SelectedIndex Then 'When we click the same item twice, unselect it.
+            SelectedPolyIndex = -1
+            polygonListBox.ClearSelected()
+            PolyListIndexReady = False
+            For i As Integer = 0 To ListOfPolygon.Count - 1
+                ReDrawPolygon(testPen, Color.Black, 1, ListOfPolygon(i))
+            Next
+        End If
+
         coordinatesListBox.Items.Clear()
         clippingWindowPoint.Clear()
         Dim PolyCoordinates As String = ""
-        Dim i As Integer = polygonListBox.SelectedIndex
-        ' Dim myPen As New Pen(Color.Black, 3)
-        Dim k, h As Integer
-        graphics = Graphics.FromImage(bitmap)
-        SelectedPolyIndex = i
-        If (i >= 0) Then
-            For k = 0 To ListOfPolygon.Count - 1
-                ' MessageBox.Show(Polygon.Count)
-                If k <> i Then
-                    Dim newPen As New Pen(Color.Black)
-                    Dim FirstPoint As Point = ListOfPolygon(k)(0) ' 00
-                    Dim LastPoint As Point = ListOfPolygon(k)(ListOfPolygon(k).Count - 1) '04
-                    For j = 0 To ListOfPolygon(k).Count - 1 '5->2>0,1,2
-                        If j < ListOfPolygon(k).Count - 1 Then
-                            Dim PointPoly1 As Point = ListOfPolygon(k)(j) '0 0,0 1,0 2
-                            Dim PointPoly2 As Point = ListOfPolygon(k)((j Mod (ListOfPolygon(k).Count - 1)) + 1) '0 1,0 2,0 1
-                            graphics.DrawLine(newPen, PointPoly1, PointPoly2)
-                        End If
-                    Next
-                    graphics.DrawLine(newPen, FirstPoint, LastPoint)
+        graphics = Graphics.FromImage(bitmapCanvas)
+        SelectedPolyIndex = polygonListBox.SelectedIndex
+
+        If (SelectedPolyIndex >= 0) Then
+            PolyListIndexReady = True
+            For numOfPolygon As Integer = 0 To ListOfPolygon.Count - 1 'TEMPORARILY COMMENTED. I am looking For a way To handle multiple polygon without Using singlemode Or multiple mode
+                If numOfPolygon <> SelectedPolyIndex Then
+                    ReDrawPolygon(testPen, Color.Black, 1, ListOfPolygon(numOfPolygon))
                 Else
-                    Dim myPen As New Pen(Color.Blue)
-                    Dim FirstPoint1 As Point = ListOfPolygon(i)(0) ' 00
-                    Dim LastPoint1 As Point = ListOfPolygon(i)(ListOfPolygon(i).Count - 1) '04
-                    For j = 0 To ListOfPolygon(i).Count - 1 '5->2>0,1,2
-                        If j < ListOfPolygon(i).Count - 1 Then
-                            Dim PointPoly3 As Point = ListOfPolygon(i)(j) '0 0,0 1,0 2
-                            Dim PointPoly4 As Point = ListOfPolygon(i)((j Mod (ListOfPolygon(i).Count - 1)) + 1) '0 1,0 2,0 1
-                            graphics.DrawLine(myPen, PointPoly3, PointPoly4)
-                        End If
-                    Next
-                    graphics.DrawLine(myPen, FirstPoint1, LastPoint1)
+                    ReDrawPolygon(testPen, Color.Blue, 1, ListOfPolygon(numOfPolygon))
                 End If
             Next
-            For j = 0 To ListOfPolygon(i).Count - 1 '5->2>0,1,2
-                PolyCoordinates = "X = " & ListOfPolygon(i)(j).X.ToString() & ", Y = " & ListOfPolygon(i)(j).Y.ToString() + vbNewLine
+            For j = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1 '5->2>0,1,2
+                PolyCoordinates = "X = " & ListOfPolygon(SelectedPolyIndex)(j).X.ToString() & ", Y = " & ListOfPolygon(SelectedPolyIndex)(j).Y.ToString() + vbNewLine
                 coordinatesListBox.Items.Add(PolyCoordinates)
             Next
         Else
-            MessageBox.Show("Please click exactly on the polygon list!")
+            PolyListIndexReady = False
         End If
-        MainCanvas.Image = bitmap
+        MainCanvas.Image = bitmapCanvas
     End Sub
+
     Private Sub ClipWindow(e As MouseEventArgs)
         mRect.X = x
         mRect.Y = y
@@ -225,42 +297,22 @@
             mRect.Width = mRect.X - e.X
             mRect.X = e.X
         ElseIf e.X < 0 And e.X < mRect.X Then
-            'mRect.Width = mRect.X
             mRect.X = 0
         ElseIf e.X < MainCanvas.Width Then
             mRect.Width = e.X - mRect.X
-            '     End If
         End If
-        '   If e.Y <= PictureBox1.Height And e.Y >= 0 Then
         If e.Y > 0 And e.Y < mRect.Y Then
             mRect.Height = mRect.Y - e.Y
             mRect.Y = e.Y
         ElseIf e.Y < 0 And e.Y < mRect.Y Then
-            '  mRect.Height = mRect.Y
             mRect.Y = 0
         ElseIf e.Y < MainCanvas.Height Then
             mRect.Height = e.Y - mRect.Y
         End If
     End Sub
-    'Private Sub insertClippingWindowPoints(ByRef rectClip As Rectangle)
-    '    'Point1.X = rectClip.X
-    '    'Point1.Y = rectClip.Y
-    '    'Point2.X = rectClip.X + rectClip.Width
-    '    'Point2.Y = rectClip.Y
-    '    'Point3.X = rectClip.X + rectClip.Width
-    '    'Point3.Y = rectClip.Y + rectClip.Height
-    '    'Point4.X = rectClip.X
-    '    'Point4.Y = rectClip.Y + rectClip.Height
-    '    clippingWindowPoint.Add(New Point(rectClip.X, rectClip.Y))
-    '    clippingWindowPoint.Add(New Point(rectClip.X + rectClip.Width, rectClip.Y))
-    '    clippingWindowPoint.Add(New Point(rectClip.X + rectClip.Width, rectClip.Y + rectClip.Height))
-    '    clippingWindowPoint.Add(New Point(rectClip.X, rectClip.Y + rectClip.Height))
-    'End Sub
-    'Private Sub refresh_window()
 
-    'End Sub
     Private Sub insertPolygon()
-        graphics = Graphics.FromImage(bitmap)
+        graphics = Graphics.FromImage(bitmapCanvas)
         For i = 0 To ListOfPolygon.Count - 1
             Dim FirstPoint As Point = ListOfPolygon(i)(0)
             Dim LastPoint As Point = ListOfPolygon(i)(ListOfPolygon(i).Count - 1)
@@ -272,8 +324,9 @@
             graphics.DrawLine(Pens.Black, FirstPoint, LastPoint)
         Next
         clippingWindowPoint.Clear()
-        MainCanvas.Image = bitmap
+        MainCanvas.Image = bitmapCanvas
     End Sub
+
     Private Sub refreshBtn_Click(sender As Object, e As EventArgs) Handles refreshBtn.Click
         If clippingWindowPoint IsNot Nothing And clippingWindowPoint.Count > 0 Then 'Make all clipping window edges to white (delete these)
             graphics.Clear(Color.White)
@@ -281,13 +334,13 @@
         Else
             MessageBox.Show("There is no clipping window")
         End If
-        isMultipleMode = False
-        isSingleMode = False
-        isClipping = True
-        singleLbl.Text = "Single Mode: Off"
-        multipleLbl.Text = "Multiple Mode: Off"
+        isMultipleMode = True
+        isClipping = False
+        ClippedPoly.Clear()
+        multipleLbl.Text = "Multiple Mode: On"
         modeLbl.Text = "Clipping Mode: Off"
     End Sub
+
     Private Sub insertPointPolygon(e As MouseEventArgs)
         Dim PolyObjStr As String = ""
         If Polygon IsNot Nothing Then
@@ -314,18 +367,11 @@
         End If
     End Sub
 
-    Private Sub SutherlandHodgman(ByRef Polygon As List(Of List(Of Point)), ByRef ClippingWindowPointList As List(Of Point), ByRef ClippedPolygon As List(Of Point), ByVal SelectedPolyIndex As Integer)
+    Private Sub findNormal(ByRef Polygon As List(Of List(Of Point)), ByRef ClippingWindowPointList As List(Of Point))
         Dim NormalRight As New List(Of System.Windows.Vector) 'Store the normal right of clipping window edge
         Dim ClipWinEdge As New List(Of System.Windows.Vector) 'LAST EDITED HERE On 3 November 2017 at 8:05 PM
-        Dim t, x_intersect, y_intersect As Double
         Dim i As Integer = 0
         Dim j As Integer = 1
-        Dim x As Integer = 0
-        Dim y As Integer = 0
-        Dim z As Integer = 1
-        Dim s As List(Of Integer) = New List(Of Integer)
-        Dim e As List(Of Integer) = New List(Of Integer)
-        Dim newPoint As Point
         While (i < ClippingWindowPointList.Count And j <= ClippingWindowPointList.Count) 'Insert clipping window edge into a list of vector -> vector of clipping window vector
             If j = ClippingWindowPointList.Count Then
                 j = 0
@@ -337,76 +383,127 @@
         ' Salah di hitungan edge. Coba dibuat supaya masuk point clipping window edge  SALAH DI HITUNGAN INI
         For edgeIndex As Integer = 0 To ClipWinEdge.Count - 1 'Insert the normal vector into a list
             NormalRight.Add(New System.Windows.Vector(ClipWinEdge(edgeIndex).Y, -ClipWinEdge(edgeIndex).X))  'NormalRight is y, -x of edge vector
-            'j = j + 1
         Next
-
-        For forClip As Integer = 0 To ClipWinEdge.Count - 1 'Trying to calculate the dot product SALAH DI SINI!!
-            For forPoly As Integer = 0 To Polygon(SelectedPolyIndex).Count - 1
-                Dim startPoint As Integer
-                Dim endPoint As Integer
-                If forPoly < Polygon(SelectedPolyIndex).Count - 1 Then
-                    '   MessageBox.Show("X = " & NormalRight(forClip).X & "Y= " & NormalRight(forClip).Y)
-                    startPoint = (Polygon(SelectedPolyIndex)(forPoly).X - ClippingWindowPointList(forClip).X) * NormalRight(forClip).X + (ClippingWindowPointList(forClip).Y - Polygon(SelectedPolyIndex)(forPoly).Y) * NormalRight(forClip).Y
-                    endPoint = (Polygon(SelectedPolyIndex)((forPoly Mod (Polygon(SelectedPolyIndex).Count - 1)) + 1).X - ClippingWindowPointList(forClip).X) * NormalRight(forClip).X + (ClippingWindowPointList(forClip).Y - Polygon(SelectedPolyIndex)((forPoly Mod (Polygon(SelectedPolyIndex).Count - 1)) + 1).Y) * NormalRight(forClip).Y
-                    s.Add(startPoint)
-                    e.Add(endPoint)
-                ElseIf forPoly = Polygon(SelectedPolyIndex).Count - 1 Then 'Handles last and first
-                    startPoint = (Polygon(SelectedPolyIndex)(Polygon(SelectedPolyIndex).Count - 1).X - ClippingWindowPointList(forClip).X) * NormalRight(forClip).X + (ClippingWindowPointList(forClip).Y - Polygon(SelectedPolyIndex)(Polygon(SelectedPolyIndex).Count - 1).Y) * NormalRight(forClip).Y
-                    endPoint = (Polygon(SelectedPolyIndex)(0).X - ClippingWindowPointList(forClip).X) * NormalRight(forClip).X + (ClippingWindowPointList(forClip).Y - Polygon(SelectedPolyIndex)(0).Y) * NormalRight(forClip).Y
-                    s.Add(startPoint)
-                    e.Add(endPoint)
-                End If
-            Next
-            'for sutherland-hodgman cases
-            While x < s.Count And y < e.Count And z <= Polygon(0).Count
-                If s(x) < 0 And e(y) < 0 Then
-                ElseIf s(x) < 0 And e(y) >= 0 Then
-                    t = findIntersection(ClippingWindowPointList(forClip), Polygon(0)(z - 1), Polygon(0)(z Mod Polygon(0).Count), NormalRight, forClip)
-                    x_intersect = findXIntersection(Polygon(0)(z - 1), Polygon(0)(z Mod Polygon(0).Count), t) '0 0 01 01 02 etc
-                    y_intersect = findYIntersection(Polygon(0)(z - 1), Polygon(0)(z Mod Polygon(0).Count), t)
-                    newPoint = New Point(x_intersect, y_intersect)
-                    ClippedPolygon.Add(newPoint)
-                    ClippedPolygon.Add(Polygon(0)(z Mod Polygon(0).Count))
-                ElseIf s(x) >= 0 And e(y) >= 0 Then
-                    ClippedPolygon.Add(Polygon(0)(z Mod Polygon(0).Count))
-                ElseIf s(x) >= 0 And e(y) < 0 Then
-                    t = findIntersection(ClippingWindowPointList(forClip), Polygon(0)(z - 1), Polygon(0)(z Mod Polygon(0).Count), NormalRight, forClip)
-                    x_intersect = findXIntersection(Polygon(0)(z - 1), Polygon(0)(z Mod Polygon(0).Count), t)
-                    y_intersect = findYIntersection(Polygon(0)(z - 1), Polygon(0)(z Mod Polygon(0).Count), t)
-                    newPoint = New Point(x_intersect, y_intersect)
-                    ClippedPolygon.Add(newPoint)
-                End If
-                x = x + 1
-                y = y + 1
-                z = z + 1
-            End While
-        Next
-        showClipped(ClippedPolygon)
+        SutherlandHodgman(NormalRight, PolyOut, Polygon, ClippingWindowPointList, SelectedPolyIndex)
         isClipping = True
-        isSingleMode = False
         isMultipleMode = False
     End Sub
+
+    Private Sub SutherlandHodgman(ByRef NormalRight As List(Of System.Windows.Vector), ByRef outputList As List(Of Point), ByRef Polygon As List(Of List(Of Point)), ByRef ClippingWindowPointList As List(Of Point), ByVal selectedPolyIndex As Integer)
+        Dim SpecialPen As Pen = Nothing
+        If PolyListIndexReady Then 'One polygon only
+            For i As Integer = 0 To Polygon(selectedPolyIndex).Count - 1
+                Dim polyPoint As Point = New Point(Polygon(selectedPolyIndex)(i).X, Polygon(selectedPolyIndex)(i).Y)
+                ClippedPoly.Add(polyPoint)
+            Next
+
+            For forClip As Integer = 0 To ClippingWindowPointList.Count - 1 'Trying to calculate the dot product SALAH DI SINI!!
+                outputList = Clip(ClippedPoly, ClippingWindowPointList, outputList, NormalRight, forClip)
+                ClippedPoly.Clear()
+                For i As Integer = 0 To outputList.Count - 1
+                    Dim outPoint As Point = New Point(outputList(i).X, outputList(i).Y)
+                    ClippedPoly.Add(outPoint)
+                Next
+                outputList.Clear()
+            Next
+            ReDrawPolygon(SpecialPen, Color.Coral, 2, ClippedPoly)
+        Else 'Process multiple polygon
+            For currentPoly As Integer = 0 To Polygon.Count - 1
+                For i As Integer = 0 To Polygon(currentPoly).Count - 1
+                    Dim polyPoint As Point = New Point(Polygon(currentPoly)(i).X, Polygon(currentPoly)(i).Y)
+                    ClippedPoly.Add(polyPoint)
+                Next
+
+                For forClip As Integer = 0 To ClippingWindowPointList.Count - 1 'Trying to calculate the dot product SALAH DI SINI!!
+                    outputList = Clip(ClippedPoly, ClippingWindowPointList, outputList, NormalRight, forClip)
+                    ClippedPoly.Clear()
+                    For i As Integer = 0 To outputList.Count - 1
+                        Dim outPoint As Point = New Point(outputList(i).X, outputList(i).Y)
+                        ClippedPoly.Add(outPoint)
+                    Next
+                    outputList.Clear()
+                Next
+                ReDrawPolygon(SpecialPen, Color.Coral, 2, ClippedPoly)
+                ClippedPoly.Clear()
+            Next
+        End If
+    End Sub
+
+    Private Function Clip(ByRef ClippedPoly As List(Of Point), ByRef ClippingWindowPointList As List(Of Point), ByRef outputList As List(Of Point), ByRef NormalRight As List(Of System.Windows.Vector), ByVal forClip As Integer)
+        Dim t, x_intersect, y_intersect As Double
+        Dim x As Integer = 0
+        ' Dim z As Integer = 1
+        Dim startPointList As List(Of Integer) = New List(Of Integer)
+        Dim endPointList As List(Of Integer) = New List(Of Integer)
+        Dim newPoint As Point
+
+        For forPoly As Integer = 0 To ClippedPoly.Count - 1
+            Dim s1 As Integer
+            Dim s2 As Integer
+            If forPoly < ClippedPoly.Count - 1 Then
+                '   MessageBox.Show("X = " & NormalRight(forClip).X & "Y= " & NormalRight(forClip).Y)
+                s1 = (ClippedPoly(forPoly).X - ClippingWindowPointList(forClip).X) * NormalRight(forClip).X + (ClippingWindowPointList(forClip).Y - ClippedPoly(forPoly).Y) * NormalRight(forClip).Y
+                s2 = (ClippedPoly((forPoly Mod (ClippedPoly.Count - 1)) + 1).X - ClippingWindowPointList(forClip).X) * NormalRight(forClip).X + (ClippingWindowPointList(forClip).Y - ClippedPoly((forPoly Mod (ClippedPoly.Count - 1)) + 1).Y) * NormalRight(forClip).Y
+                startPointList.Add(s1)
+                endPointList.Add(s2)
+            ElseIf forPoly = ClippedPoly.Count - 1 Then 'last and first
+                s1 = (ClippedPoly(ClippedPoly.Count - 1).X - ClippingWindowPointList(forClip).X) * NormalRight(forClip).X + (ClippingWindowPointList(forClip).Y - ClippedPoly(ClippedPoly.Count - 1).Y) * NormalRight(forClip).Y
+                s2 = (ClippedPoly(0).X - ClippingWindowPointList(forClip).X) * NormalRight(forClip).X + (ClippingWindowPointList(forClip).Y - ClippedPoly(0).Y) * NormalRight(forClip).Y
+                startPointList.Add(s1)
+                endPointList.Add(s2)
+            End If
+        Next
+
+        'for sutherland-hodgman cases
+        While x < startPointList.Count And x < endPointList.Count And x + 1 <= ClippedPoly.Count
+            If startPointList(x) < 0 And endPointList(x) < 0 Then
+            ElseIf startPointList(x) < 0 And endPointList(x) >= 0 Then
+                t = findIntersection(ClippingWindowPointList(forClip), ClippedPoly((x + 1) - 1), ClippedPoly((x + 1) Mod ClippedPoly.Count), NormalRight, forClip)
+                x_intersect = findXIntersection(ClippedPoly((x + 1) - 1), ClippedPoly((x + 1) Mod ClippedPoly.Count), t) '0 0 01 01 02 etc
+                y_intersect = findYIntersection(ClippedPoly((x + 1) - 1), ClippedPoly((x + 1) Mod ClippedPoly.Count), t)
+                newPoint = New Point(x_intersect, y_intersect)
+                outputList.Add(newPoint)
+                outputList.Add(ClippedPoly((x + 1) Mod ClippedPoly.Count))
+            ElseIf startPointList(x) >= 0 And endPointList(x) >= 0 Then
+                outputList.Add(ClippedPoly((x + 1) Mod ClippedPoly.Count))
+            ElseIf startPointList(x) >= 0 And endPointList(x) < 0 Then
+                t = findIntersection(ClippingWindowPointList(forClip), ClippedPoly((x + 1) - 1), ClippedPoly((x + 1) Mod ClippedPoly.Count), NormalRight, forClip)
+                x_intersect = findXIntersection(ClippedPoly((x + 1) - 1), ClippedPoly((x + 1) Mod ClippedPoly.Count), t)
+                y_intersect = findYIntersection(ClippedPoly((x + 1) - 1), ClippedPoly((x + 1) Mod ClippedPoly.Count), t)
+                newPoint = New Point(x_intersect, y_intersect)
+                outputList.Add(newPoint)
+            End If
+            x = x + 1
+        End While
+        Return outputList
+    End Function
+
     Private Function findIntersection(ByRef clipPoint As Point, ByRef polyPoint1 As Point, ByRef polyPoint2 As Point, ByRef rightNormal As List(Of System.Windows.Vector), ByVal forClip As Integer)
         Dim t As Double
         t = (((clipPoint.X - polyPoint1.X) * rightNormal(forClip).X) + ((clipPoint.Y - polyPoint1.Y) * rightNormal(forClip).Y)) / (((polyPoint2.X - polyPoint1.X) * rightNormal(forClip).X) + ((polyPoint2.Y - polyPoint1.Y) * rightNormal(forClip).Y))
         Return t
     End Function
+
     Private Function findXIntersection(ByRef polyPoint1 As Point, ByRef polyPoint2 As Point, ByVal t As Double)
         Dim Xc As Double
         Xc = polyPoint1.X + t * (polyPoint2.X - polyPoint1.X)
         Return Xc
     End Function
+
     Private Function findYIntersection(ByRef polyPoint1 As Point, ByRef polyPoint2 As Point, ByVal t As Double)
         Dim Yc As Double
         Yc = polyPoint1.Y + t * (polyPoint2.Y - polyPoint1.Y)
         Return Yc
     End Function
-    Private Sub showClipped(ByRef ClippedPolygon As List(Of Point))
-        For i As Integer = 0 To ClippedPolygon.Count - 1
-            If i < ClippedPolygon.Count - 1 Then
-                graphics.DrawLine(Pens.Coral, ClippedPolygon(i), ClippedPolygon(i + 1))
+
+    Private Sub ReDrawPolygon(ByRef pen As Pen, ByRef penColor As Color, ByVal penWidth As Integer, ByRef DrawnPolygon As List(Of Point))
+        pen = New Pen(penColor)
+        pen.Width = penWidth
+        For i As Integer = 1 To DrawnPolygon.Count - 1
+            If i = DrawnPolygon.Count - 1 Then
+                graphics.DrawLine(pen, DrawnPolygon(0), DrawnPolygon(i))
             End If
-            graphics.DrawLine(Pens.Coral, ClippedPolygon(0), ClippedPolygon(ClippedPolygon.Count - 1))
+            graphics.DrawLine(pen, DrawnPolygon(i - 1), DrawnPolygon(i))
         Next
     End Sub
 

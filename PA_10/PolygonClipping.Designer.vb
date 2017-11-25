@@ -30,6 +30,8 @@ Partial Class PolygonClipping
         Me.OpenToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SaveToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
+        Me.HelpToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.AboutUsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.coorLbl = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.modeLbl = New System.Windows.Forms.Label()
@@ -89,7 +91,7 @@ Partial Class PolygonClipping
         'OpenToolStripMenuItem
         '
         Me.OpenToolStripMenuItem.Name = "OpenToolStripMenuItem"
-        Me.OpenToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.OpenToolStripMenuItem.Size = New System.Drawing.Size(103, 22)
         Me.OpenToolStripMenuItem.Text = "Open"
         '
         'SaveToolStripMenuItem
@@ -101,12 +103,25 @@ Partial Class PolygonClipping
         'MenuStrip1
         '
         Me.MenuStrip1.BackColor = System.Drawing.SystemColors.Control
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.HelpToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Size = New System.Drawing.Size(774, 24)
         Me.MenuStrip1.TabIndex = 13
         Me.MenuStrip1.Text = "MenuStrip1"
+        '
+        'HelpToolStripMenuItem
+        '
+        Me.HelpToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AboutUsToolStripMenuItem})
+        Me.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem"
+        Me.HelpToolStripMenuItem.Size = New System.Drawing.Size(44, 20)
+        Me.HelpToolStripMenuItem.Text = "Help"
+        '
+        'AboutUsToolStripMenuItem
+        '
+        Me.AboutUsToolStripMenuItem.Name = "AboutUsToolStripMenuItem"
+        Me.AboutUsToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.AboutUsToolStripMenuItem.Text = "About Me"
         '
         'coorLbl
         '
@@ -233,4 +248,6 @@ Partial Class PolygonClipping
     Friend WithEvents PolyPoint_TextBox As TextBox
     Friend WithEvents PolyPoint_Coord_Label As Label
     Friend WithEvents DeletePointButton As Button
+    Friend WithEvents HelpToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents AboutUsToolStripMenuItem As ToolStripMenuItem
 End Class

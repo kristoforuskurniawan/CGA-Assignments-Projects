@@ -20,7 +20,7 @@
         MainCanvas.Image = bitmapCanvas
         PolyOut = New List(Of Point)
         ListOfPolygon = New List(Of List(Of Point))
-        'ListOfClippedPoly = New List(Of List(Of Point)) 'Handle multiple polygon
+        'ListOfClippedPolygon = New List(Of List(Of Point)) 'Handle multiple polygon
         clippingWindowPoint = New List(Of Point) 'Clipping window points
         isMultipleMode = True
         isClipping = False
@@ -38,48 +38,63 @@
             forX = ""
             forY = ""
             If SelectedPolyIndex <> -1 And SelectedPolyPointIndex <> -1 Then
-                While (i < PolyPoint_TextBox.Text.Count - 1 And PolyPoint_TextBox.Text(i) <> ",") 'Keeps reading until ',' is found
-                    forX += PolyPoint_TextBox.Text(i)
-                    i = i + 1
-                End While
+                If PolyPoint_TextBox.Text <> "" Then
 
-                i = i + 2 'Start after white space
+                    While (i < PolyPoint_TextBox.Text.Count - 1 And PolyPoint_TextBox.Text(i) <> ",") 'Keeps reading until ',' is found
+                        forX += PolyPoint_TextBox.Text(i)
+                        i = i + 1
+                    End While
 
-                While i < PolyPoint_TextBox.Text.Count
-                    forY += PolyPoint_TextBox.Text(i)
-                    i = i + 1
-                End While
-
-                newX = newX + Integer.Parse(forX)
-                newY = newY + Integer.Parse(forY)
-
-                For B As Integer = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1
-                    If B = SelectedPolyPointIndex Then
-                        ListOfPolygon(SelectedPolyIndex).RemoveAt(B)
-                        ListOfPolygon(SelectedPolyIndex).Insert(B, New Point(newX, newY))
+                    If Not System.Text.RegularExpressions.Regex.IsMatch(forX, "^[0-9 ]+$") Then
+                        MessageBox.Show("x should be numeric only!")
                     End If
-                Next
 
-                coordinatesListBox.Items.Clear()
-                Dim PolyCoordinates As String = ""
-                For j = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1 'Write back the inside of polygon coordinate listbox
-                    PolyCoordinates = "X = " & ListOfPolygon(SelectedPolyIndex)(j).X.ToString() & ", Y = " & ListOfPolygon(SelectedPolyIndex)(j).Y.ToString() + vbNewLine
-                    coordinatesListBox.Items.Add(PolyCoordinates)
-                Next
+                    i = i + 1
 
-                ' Then redraw the selected polygon
-                graphics.Clear(Color.White)
-                For polyIndex As Integer = 0 To ListOfPolygon.Count - 1
-                    For p As Integer = 1 To ListOfPolygon(polyIndex).Count - 1
-                        If p = ListOfPolygon(polyIndex).Count - 1 Then
-                            graphics.DrawLine(Pens.Black, ListOfPolygon(polyIndex)(0), ListOfPolygon(polyIndex)(p))
-                        End If
-                        graphics.DrawLine(Pens.Black, ListOfPolygon(polyIndex)(p - 1), ListOfPolygon(polyIndex)(p))
-                    Next
-                Next
-                MainCanvas.Image = bitmapCanvas
+                    While i < PolyPoint_TextBox.Text.Count
+                        forY += PolyPoint_TextBox.Text(i)
+                        i = i + 1
+                    End While
+                    If Not System.Text.RegularExpressions.Regex.IsMatch(forY, "^[0-9 ]+$") Then
+                        MessageBox.Show("y should be numerical only!")
+                    End If
+
+                Else
+                    MessageBox.Show("Please type the new vertex")
+                End If
+
+                If (IsNumeric(forX) And IsNumeric(forY)) Then 'Make sure all inputs are just numbers
+                    newX = newX + Integer.Parse(forX) 'Integer.Parse prevents whitespace. This is magic...
+                    newY = newY + Integer.Parse(forY)
+
+                    '610 x 340
+                    If (newX >= 0 And newX <= 610 And newY >= 0 And newY <= 340) Then 'Limit so that new point won't exceed the canvas resolution
+                        For B As Integer = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1
+                            If B = SelectedPolyPointIndex Then
+                                ListOfPolygon(SelectedPolyIndex).RemoveAt(B)
+                                ListOfPolygon(SelectedPolyIndex).Insert(B, New Point(newX, newY))
+                            End If
+                        Next
+
+                        coordinatesListBox.Items.Clear()
+                        Dim PolyCoordinates As String = ""
+                        For j = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1 'Write back the inside of polygon coordinate listbox
+                            PolyCoordinates = "X = " & ListOfPolygon(SelectedPolyIndex)(j).X.ToString() & ", Y = " & ListOfPolygon(SelectedPolyIndex)(j).Y.ToString() + vbNewLine
+                            coordinatesListBox.Items.Add(PolyCoordinates)
+                        Next
+
+                        ' Then redraw the selected polygon
+                        graphics.Clear(Color.White)
+                        For polyIndex As Integer = 0 To ListOfPolygon.Count - 1
+                            ReDrawPolygon(Pens.Black, Color.Black, 1, ListOfPolygon(polyIndex))
+                        Next
+                        MainCanvas.Image = bitmapCanvas
+                    Else
+                        MessageBox.Show("New X or New Y whether below 0 or exceed canvas resolution")
+                    End If
+                End If
             Else
-                MessageBox.Show("Please draw polygon first!")
+                MessageBox.Show("Please draw polygon first and select the polygon vertex!")
             End If
         End If
     End Sub
@@ -89,15 +104,16 @@
         Dim pointPoly As String = ""
         If ListOfPolygon IsNot Nothing Then
             For i = 0 To ListOfPolygon.Count - 1
-                pointPoly += "Polygon " & (i + 1).ToString() + vbNewLine
+                pointPoly += "Polygon " & i + 1.ToString() & vbNewLine
                 For j = 1 To ListOfPolygon(i).Count  '3
                     Dim PointPoly1 As Point = ListOfPolygon(i)(j - 1) '0 0 0 1 0 2
                     Dim PointPoly2 As Point = ListOfPolygon(i)(j Mod ListOfPolygon(i).Count) '0 1 0 2
-                    pointPoly += "X = " & ListOfPolygon(i)(j - 1).X.ToString() & ", Y = " & ListOfPolygon(i)(j - 1).Y.ToString() + vbNewLine
+                    pointPoly += "|" & ListOfPolygon(i)(j - 1).X.ToString() & ", " & ListOfPolygon(i)(j - 1).Y.ToString()
                 Next
+                pointPoly += vbNewLine
             Next
         End If
-        saveFileDialog1.Filter = "txt files (*.txt)|*.txt"
+        saveFileDialog1.Filter = "*.txt|*.txt"
         saveFileDialog1.FilterIndex = 2
         saveFileDialog1.RestoreDirectory = True
         If saveFileDialog1.ShowDialog() = DialogResult.OK Then
@@ -105,41 +121,126 @@
         End If
     End Sub
 
-    Private Sub OpenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem.Click
+    'The only feature left is open... Still buggy tho :(
+    'Private Sub OpenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem.Click 'Open from a text file containing polygon(s) list and its points
+    '    'MessageBox.Show("We are sorry, this feature is under maintenance and cannot be used yet.", "Attention")
+    '    Dim fileReader, currentString, PolyObjStr, tempChar As String
+    '    Polygon = New List(Of Point)
+    '    Dim i As Integer = 0
+    '    tempChar = ""
+    '    fileReader = ""
+    '    currentString = ""
+    '    PolyObjStr = ""
+    '    Dim openFileDialog As New OpenFileDialog()
+    '    Dim currentLine As Integer = 1
+    '    Dim sr As System.IO.StreamReader
+    '    openFileDialog.Filter = "*.txt|*.txt"
+    '    openFileDialog.FilterIndex = 2
+    '    openFileDialog.RestoreDirectory = True
+    '    If openFileDialog.ShowDialog() = DialogResult.OK Then 'If the open file is success
 
-    End Sub
+    '        If polygonListBox.Items.Count > 0 Then
+    '            polygonListBox.Items.Clear()
+    '        End If
+
+    '        If coordinatesListBox.Items.Count > 0 Then
+    '            coordinatesListBox.Items.Clear()
+    '        End If
+
+    '        sr = My.Computer.FileSystem.OpenTextFileReader(openFileDialog.FileName)
+    '        Do Until sr.EndOfStream And i < fileReader.Count 'Loop until end of file
+    '            currentLine = currentLine + 1
+    '            fileReader = My.Computer.FileSystem.ReadAllText(openFileDialog.FileName, System.Text.Encoding.UTF8)
+    '            fileReader = sr.ReadLine 'Read per line
+    '            If currentLine Mod 2 = 0 Then 'Polygon insertion
+    '                'MessageBox.Show(fileReader)
+    '                PolyObjStr = fileReader
+    '                ListOfPolygon.Add(Polygon)
+    '                polygonListBox.Items.Add(PolyObjStr)
+    '                PolyObjStr = ""
+    '            ElseIf currentLine Mod 2 <> 0 Then 'Point insertion
+    '                For j As Integer = 0 To fileReader.Count - 1
+    '                    'If fileReader(j) = "|" Then
+    '                    '    Continue For
+    '                    'Else
+
+    '                    'End If
+    '                    tempChar += fileReader(j)
+    '                Next
+    '                MessageBox.Show(currentLine.ToString())
+    '                'MessageBox.Show(polygonListBox.Items(currentLine - 1) & vbNewLine & tempChar)
+    '                tempChar = ""
+    '            End If
+    '        Loop
+    '        MessageBox.Show("Number of polygon(s) : " & ListOfPolygon.Count.ToString())
+    '    Else
+    '        MessageBox.Show("No such file!")
+    '    End If
+    'End Sub
+
+    'Private Sub OpenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem.Click
+    '    Dim fileReader, split_1(), split_2() As String
+    '    Dim lineNum As Integer = 0
+    '    Dim PolyObjStr As String = ""
+    '    Dim PolyCoordinates As String = ""
+    '    Dim openFileDialog As New OpenFileDialog()
+    '    Dim sr As System.IO.StreamReader
+    '    Polygon = New List(Of Point)
+    '    graphics.Clear(Color.White)
+    '    ListOfPolygon.Clear()
+    '    Polygon.Clear()
+    '    polygonListBox.Items.Clear()
+    '    openFileDialog.Filter = "txt files (*.txt)|*.txt"
+    '    openFileDialog.FilterIndex = 2
+    '    openFileDialog.RestoreDirectory = True
+    '    If openFileDialog.ShowDialog() = DialogResult.OK Then
+    '        sr = My.Computer.FileSystem.OpenTextFileReader(openFileDialog.FileName)
+    '        Do While sr.Peek() >= 0
+    '            fileReader = sr.ReadLine()
+    '            split_1 = fileReader.Split("|")
+    '            If split_1(0) = "Polygon" Then
+    '                Dim i As Integer = 1
+    '                While i < split_1.Length
+    '                    split_2 = split_1(i).Split(",")
+    '                    'PolyObjStr += split_2(i)
+    '                    Polygon.Add(New Point(split_2(0), split_2(1)))
+    '                    i += 1
+    '                End While
+    '                ListOfPolygon.Add(Polygon)
+    '                'polygonListBox.Items.Add("Polygon " & ListOfPolygon.Count.ToString())
+    '                'MessageBox.Show("Polygon " & ListOfPolygon.Count & " has " & Polygon.Count & " points.")
+    '                For numOfPoly As Integer = 0 To ListOfPolygon.Count - 1
+    '                    'For numOfPolyPoint As Integer = 0 To ListOfPolygon(numOfPoly).Count - 1
+    '                    '    ListOfPolygon(numOfPoly).Add(New Point(split_2(0))
+    '                    'Next
+    '                    'MessageBox.Show(ListOfPolygon(0)(0).X.ToString())
+    '                    ReDrawPolygon(Pens.Black, Color.Black, 1, ListOfPolygon(numOfPoly))
+    '                    polygonListBox.Items.Add("Polygon " & ListOfPolygon.Count.ToString())
+    '                Next
+    '                MainCanvas.Image = bitmapCanvas
+    '                'MessageBox.Show("Number of Polygon = " & Polygon.Count)
+    '                'MessageBox.Show(PolyObjStr)
+    '                Polygon.Clear()
+    '            End If
+    '        Loop
+    '    End If
+    'End Sub
 
     Private Sub MainCanvas_MouseDown(sender As Object, e As MouseEventArgs) Handles MainCanvas.MouseDown
         isMouseDown = True
         If isClipping And Not isMultipleMode Then
             graphics.Clear(Color.White)
             PolyOut.Clear()
-            insertPolygon()
+            For i = 0 To ListOfPolygon.Count - 1
+                ReDrawPolygon(Pens.Black, Color.Black, 1, ListOfPolygon(i))
+            Next
+            MainCanvas.Image = bitmapCanvas
+            clippingWindowPoint.Clear()
+
             x = e.X
             y = e.Y
         ElseIf isMultipleMode And Not isClipping Then
             insertPointPolygon(e)
-        ElseIf Not isClipping And Not isMultipleMode Then
-            If ListOfPolygon.Count = 0 Then
-                insertPointPolygon(e)
-            Else
-                For i = 0 To ListOfPolygon.Count - 1
-                    Dim FirstPoint As Point = ListOfPolygon(i)(0)
-                    Dim LastPoint As Point = ListOfPolygon(i)(ListOfPolygon(i).Count - 1)
-                    For j = 1 To ListOfPolygon(i).Count - 1
-                        Dim PointPoly1 As Point = ListOfPolygon(i)(j - 1) '0 0 0 1
-                        Dim PointPoly2 As Point = ListOfPolygon(i)(j) '0 1 0 2
-                        graphics.DrawLine(Pens.White, PointPoly1, PointPoly2)
-                    Next
-                    graphics.DrawLine(Pens.White, FirstPoint, LastPoint)
-                Next
-                ListOfPolygon.Clear()
-                polygonListBox.Items.Clear()
-                coordinatesListBox.Items.Clear()
-                Polygon = New List(Of Point)
-                StartPoint = e.Location
-                Polygon.Add(e.Location)
-            End If
         End If
     End Sub
 
@@ -207,7 +308,7 @@
     End Sub
 
     Private Sub clippingBtn_Click(sender As Object, e As EventArgs) Handles clippingBtn.Click
-        If isClipping = True Then
+        If isClipping Then
             isClipping = False
             modeLbl.Text = "Clipping Mode: Off"
         Else
@@ -227,36 +328,51 @@
         End If
     End Sub
 
+    Private Sub AboutUsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AboutUsToolStripMenuItem.Click
+        MessageBox.Show(
+            "Sutherland and Hodgman Clipping demo ver. 0.1a" & vbNewLine & vbNewLine &
+            "User Inteface :" & vbNewLine & vbTab &
+                "1. Jonathan Surya" & vbNewLine & vbTab &
+                "2. Ardy Wijaya" & vbNewLine & vbTab &
+                "3. Kristoforus Kurniawan" & vbNewLine & vbNewLine &
+            "Coding :" & vbNewLine & vbTab &
+                "1. Kristoforus Kurniawan" & vbNewLine & vbTab &
+                "2. Ardy Wijaya" & vbNewLine & vbTab &
+                "3. Jonathan Surya", "About Me", MessageBoxButtons.OK)
+    End Sub
+
     Private Sub DeletePointButton_Click(sender As Object, e As EventArgs) Handles DeletePointButton.Click
         Dim SpecialPen As Pen = Nothing
 
         If SelectedPolyIndex < 0 Or SelectedPolyPointIndex < 0 Then
             MessageBox.Show("Please select the polygon and point to be edited!")
-        End If
+        Else
+            If ListOfPolygon(SelectedPolyIndex).Count > 3 Then 'At least 3 points inside polygon
+                ListOfPolygon(SelectedPolyIndex).RemoveAt(SelectedPolyPointIndex)
+                graphics.Clear(Color.White)
+                For polyIndex As Integer = 0 To ListOfPolygon.Count - 1
+                    ReDrawPolygon(SpecialPen, Color.Black, 1, ListOfPolygon(polyIndex))
+                Next
 
-        If ListOfPolygon(SelectedPolyIndex).Count > 3 Then 'At least 3 points inside polygon
-            ListOfPolygon(SelectedPolyIndex).RemoveAt(SelectedPolyPointIndex)
-            graphics.Clear(Color.White)
-            For polyIndex As Integer = 0 To ListOfPolygon.Count - 1
-                ReDrawPolygon(SpecialPen, Color.Black, 1, ListOfPolygon(polyIndex))
-            Next
-
-            coordinatesListBox.Items.Clear()
-            Dim PolyCoordinates As String = ""
-            For j = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1 'Write back the inside of polygon coordinate listbox
-                PolyCoordinates = "X = " & ListOfPolygon(SelectedPolyIndex)(j).X.ToString() & ", Y = " & ListOfPolygon(SelectedPolyIndex)(j).Y.ToString() + vbNewLine
-                coordinatesListBox.Items.Add(PolyCoordinates)
-            Next
-
-        Else 'Less than 3 points
-            MessageBox.Show("Cannot delete any point from this polygon since the mininum is 3 points!")
+                coordinatesListBox.Items.Clear()
+                Dim PolyCoordinates As String = ""
+                For j = 0 To ListOfPolygon(SelectedPolyIndex).Count - 1 'Write back the inside of polygon coordinate listbox
+                    PolyCoordinates = "X = " & ListOfPolygon(SelectedPolyIndex)(j).X.ToString() & ", Y = " & ListOfPolygon(SelectedPolyIndex)(j).Y.ToString() + vbNewLine
+                    coordinatesListBox.Items.Add(PolyCoordinates)
+                Next
+                PolyPoint_TextBox.Text = ""
+                SelectedPolyPointIndex = -1 'Reset the value of selected point index to prevent continuous clicking
+            Else 'Less than 3 points
+                MessageBox.Show("Cannot delete any point from this polygon since the mininum is 3 points!")
+            End If
         End If
         MainCanvas.Image = bitmapCanvas
     End Sub
 
     Private Sub polygonListBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles polygonListBox.SelectedIndexChanged
         Dim testPen As Pen = Nothing
-        If SelectedPolyIndex = polygonListBox.SelectedIndex Then 'When we click the same item twice, unselect it.
+
+        If PolyListIndexReady And SelectedPolyIndex = polygonListBox.SelectedIndex Then 'When we click the same item twice, unselect it.
             SelectedPolyIndex = -1
             polygonListBox.ClearSelected()
             PolyListIndexReady = False
@@ -293,20 +409,20 @@
     Private Sub ClipWindow(e As MouseEventArgs)
         mRect.X = x
         mRect.Y = y
-        If e.X >= 0 And e.X < mRect.X Then
+        If e.X >= 0 And e.X < mRect.X Then  'Drawing diagonal top right to left bottom
             mRect.Width = mRect.X - e.X
             mRect.X = e.X
-        ElseIf e.X < 0 And e.X < mRect.X Then
+        ElseIf e.X < 0 And e.X < mRect.X Then 'Drawing from bottom right to top left
             mRect.X = 0
-        ElseIf e.X < MainCanvas.Width Then
+        ElseIf e.X < MainCanvas.Width Then 'Bottom left to  top right
             mRect.Width = e.X - mRect.X
         End If
-        If e.Y > 0 And e.Y < mRect.Y Then
+        If e.Y > 0 And e.Y < mRect.Y Then 'Bottom left to top right
             mRect.Height = mRect.Y - e.Y
             mRect.Y = e.Y
-        ElseIf e.Y < 0 And e.Y < mRect.Y Then
+        ElseIf e.Y < 0 And e.Y < mRect.Y Then 'Drawing from bottom right to top left
             mRect.Y = 0
-        ElseIf e.Y < MainCanvas.Height Then
+        ElseIf e.Y < MainCanvas.Height Then 'Top left to bottom right
             mRect.Height = e.Y - mRect.Y
         End If
     End Sub
